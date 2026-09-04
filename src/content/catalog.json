@@ -1,0 +1,17 @@
+{
+	"projects": [
+		{
+			"title": "UBQ",
+			"slug": "ubq",
+			"summary": "A developing algorithm project concerned with unbounded multi-producer, multi-consumer FIFO queues.",
+			"status": "In development",
+			"featured": true,
+			"tags": ["unbounded MPMC FIFO"],
+			"links": { "paper": null, "code": null, "docs": null, "demo": null },
+			"draft": true
+		}
+	],
+	"writing": [],
+	"photoEssays": [],
+	"galleryImages": []
+}

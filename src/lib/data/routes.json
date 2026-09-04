@@ -1,0 +1,26 @@
+[
+	{ "path": "/", "label": "Home", "primary": false, "sitemap": true },
+	{ "path": "/about", "label": "About Me", "primary": true, "sitemap": true },
+	{
+		"path": "/projects",
+		"label": "Research & Projects",
+		"primary": true,
+		"sitemap": true
+	},
+	{ "path": "/projects/ubq", "label": "UBQ", "primary": false, "sitemap": true },
+	{ "path": "/writing", "label": "Writing", "primary": true, "sitemap": true },
+	{
+		"path": "/photography",
+		"label": "Photography",
+		"primary": true,
+		"sitemap": true
+	},
+	{
+		"path": "/photography/essays",
+		"label": "Photo Essays",
+		"primary": false,
+		"sitemap": true
+	},
+	{ "path": "/cv", "label": "CV", "primary": true, "sitemap": true },
+	{ "path": "/404", "label": "Page not found", "primary": false, "sitemap": false }
+]
