@@ -3,155 +3,102 @@
 	import PageMeta from '$lib/components/PageMeta.svelte';
 	import { getProject } from '$lib/content/catalog';
 	import { site } from '$lib/data/site';
-	import { plannedWriting, principles, projectDepths, visitorPaths } from '$lib/data/vision';
+	import { plannedWriting } from '$lib/data/vision';
 
 	const ubq = getProject('ubq');
+	const writingPreview = plannedWriting.slice(0, 3);
 </script>
 
 <PageMeta title={site.name} description={site.description} path="/" />
 
-<div class="page-shell">
-	<section class="hero" aria-labelledby="home-heading">
-		<div>
-			<p class="eyebrow">Algorithms · Essays · Photography</p>
-			<h1 id="home-heading">A place to discover, then understand.</h1>
-			<p class="lede">
-				Nicolas is building a personal forum for the algorithms, reasoning, and experiments behind
-				his work—and for photographs whose context deserves to be recorded. Each subject should be
-				approachable at first glance and deep enough for the reader who wants the details.
-			</p>
-		</div>
-		<aside class="hero__note" aria-label="How to use this site">
-			<strong>Choose your depth</strong>
-			Start with the explanation you need. Project pages move from a plain-language orientation to technical
-			evidence without asking every visitor to read every detail.
-		</aside>
+<div class="page-shell home-index" data-identity-prototype data-draft-only>
+	<header class="home-index__intro">
+		<p class="index-label">Index / identity prototype</p>
+		<h1>Technical work, writing, and photography.</h1>
+		<p>
+			An evolving record of research, explanations, and photographs. Each entry begins with a
+			concise orientation and opens into the reasoning, evidence, or context behind it.
+		</p>
+	</header>
+
+	<section class="index-block index-block--featured" aria-labelledby="research-heading">
+		<header class="index-block__heading">
+			<span aria-hidden="true">01</span>
+			<h2 id="research-heading">Research &amp; Projects</h2>
+		</header>
+
+		<article class="featured-entry">
+			<div>
+				<p class="entry-meta">Featured / {ubq.status}</p>
+				<h3><a href={resolve('/projects/ubq')}>{ubq.title}</a></h3>
+				<p>{ubq.summary}</p>
+			</div>
+			<a class="index-link" href={resolve('/projects/ubq')}>
+				Project overview <span aria-hidden="true">→</span>
+			</a>
+		</article>
 	</section>
 
-	<section class="home-section" aria-labelledby="research-heading">
-		<div class="section-heading">
-			<p class="eyebrow">01 · Featured research</p>
-			<div>
-				<h2 id="research-heading">UBQ, from interface to internals.</h2>
-				<p>The first project hub is organized as a route through the work, not a wall of detail.</p>
-			</div>
-		</div>
+	<div class="index-columns">
+		<section class="index-block" aria-labelledby="writing-heading">
+			<header class="index-block__heading">
+				<span aria-hidden="true">02</span>
+				<h2 id="writing-heading">Writing</h2>
+			</header>
 
-		<div class="research-feature">
-			<article class="feature-card feature-card--accent">
-				<div>
-					<p class="eyebrow">{ubq.status}</p>
-					<h3>{ubq.title}</h3>
-					<p>{ubq.summary}</p>
-				</div>
-				<a class="text-link" href={resolve('/projects/ubq')}>Begin with UBQ</a>
-			</article>
-
-			<ol class="depth-preview" aria-label="Levels of a project explanation">
-				{#each projectDepths as depth, index (depth.label)}
+			<ol class="working-index">
+				{#each writingPreview as title, index (title)}
 					<li>
 						<span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
 						<div>
-							<strong>{depth.label}</strong>
-							<p>{depth.question}</p>
+							<p>{title}</p>
+							<small>Working topic</small>
 						</div>
 					</li>
 				{/each}
 			</ol>
-		</div>
-	</section>
 
-	<section class="home-section" aria-labelledby="writing-heading">
-		<div class="section-heading">
-			<p class="eyebrow">02 · Writing</p>
-			<div>
-				<h2 id="writing-heading">The work behind the result.</h2>
+			<a class="index-link" href={resolve('/writing')}>
+				Writing index <span aria-hidden="true">→</span>
+			</a>
+		</section>
+
+		<section class="index-block" aria-labelledby="photography-heading">
+			<header class="index-block__heading">
+				<span aria-hidden="true">03</span>
+				<h2 id="photography-heading">Photography</h2>
+			</header>
+
+			<div class="photography-index">
+				<p class="entry-meta">Selection in progress</p>
 				<p>
-					Design decisions, failed paths, benchmarks, and implementation details can each become a
-					useful explanation in their own right.
+					A filterless gallery will preserve the proportions of selected photographs. Images with
+					additional context will lead to a canonical photo essay.
 				</p>
 			</div>
-		</div>
 
-		<div class="writing-preview" data-draft-only>
-			<div>
-				<p class="eyebrow">On the workbench</p>
-				<p class="lede lede--compact">
-					These are planned lines of inquiry, not published articles. Finished writing will receive
-					real dates, stable URLs, and deliberate links back to the project it develops.
-				</p>
-				<a class="text-link" href={resolve('/writing')}>Explore Writing</a>
-			</div>
-			<ol class="planned-list">
-				{#each plannedWriting as title, index (title)}
-					<li><span>{String(index + 1).padStart(2, '0')}</span>{title}</li>
-				{/each}
-			</ol>
-		</div>
-	</section>
+			<a class="index-link" href={resolve('/photography')}>
+				Photography index <span aria-hidden="true">→</span>
+			</a>
+		</section>
+	</div>
 
-	<section class="home-section photography-preview" aria-labelledby="photography-heading">
-		<div class="photography-preview__statement">
-			<p class="eyebrow">03 · Photography</p>
-			<h2 id="photography-heading">The photograph is only half the record.</h2>
-		</div>
-		<div class="photography-preview__body">
+	<section class="index-block index-block--about" aria-labelledby="about-heading">
+		<header class="index-block__heading">
+			<span aria-hidden="true">04</span>
+			<h2 id="about-heading">About &amp; CV</h2>
+		</header>
+
+		<div class="about-index">
 			<p>
-				A selected gallery will make room for images to stand on their own. Photo essays will keep
-				the short account of where, when, or why an image mattered when that context belongs beside
-				it.
+				Personal background and the professional record remain concentrated in their own pages,
+				leaving the rest of the site to foreground the work.
 			</p>
-			<p class="quiet-note">
-				Only photographs, sequencing, captions, and public metadata approved by Nicolas will appear
-				here.
-			</p>
-			<a class="text-link" href={resolve('/photography')}>Enter Photography</a>
-		</div>
-	</section>
-
-	<section class="home-section" aria-labelledby="principles-heading">
-		<div class="section-heading">
-			<p class="eyebrow">04 · A useful standard</p>
-			<div>
-				<h2 id="principles-heading">Three tests for every page.</h2>
-				<p>A page succeeds when it gives the reader a useful answer and a clear next step.</p>
-			</div>
-		</div>
-
-		<dl class="principle-list">
-			{#each principles as principle, index (principle.name)}
-				<div>
-					<span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-					<dt>{principle.name}</dt>
-					<dd>{principle.summary}</dd>
-					<dd class="principle-list__prompt">{principle.prompt}</dd>
-				</div>
-			{/each}
-		</dl>
-	</section>
-
-	<section class="home-section" aria-labelledby="paths-heading">
-		<div class="section-heading">
-			<p class="eyebrow">05 · Find your route</p>
-			<div>
-				<h2 id="paths-heading">What brought you here?</h2>
-				<p>Choose the closest question. The surrounding paths stay available from every page.</p>
-			</div>
-		</div>
-
-		<div class="route-list">
-			{#each visitorPaths as path (path.audience)}
-				<article>
-					<div>
-						<p class="eyebrow">{path.audience}</p>
-						<h3>{path.question}</h3>
-					</div>
-					<div class="link-pair">
-						<a href={resolve(path.primaryHref)}>{path.primaryLabel}</a>
-						<a href={resolve(path.secondaryHref)}>{path.secondaryLabel}</a>
-					</div>
-				</article>
-			{/each}
+			<nav aria-label="About and CV links">
+				<a class="index-link" href={resolve('/about')}>About Me <span aria-hidden="true">→</span></a
+				>
+				<a class="index-link" href={resolve('/cv')}>CV <span aria-hidden="true">→</span></a>
+			</nav>
 		</div>
 	</section>
 </div>

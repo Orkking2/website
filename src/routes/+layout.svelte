@@ -9,7 +9,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<meta name="theme-color" content="#f4f1e9" />
+	<meta name="theme-color" content="#000000" />
 </svelte:head>
 
 <a class="skip-link" href="#main-content">Skip to main content</a>

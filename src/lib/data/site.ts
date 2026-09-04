@@ -2,10 +2,10 @@ import type { Pathname } from '$app/types';
 import routeDefinitions from './routes.json';
 
 export const site = {
-	name: 'Nicolas',
-	title: 'Nicolas — Research, Writing & Photography',
+	name: 'nebve.com',
+	title: 'nebve.com — Research, Writing & Photography',
 	description:
-		"Nicolas's personal forum for algorithms, technical writing, photography, and professional work.",
+		'An evolving index of technical work, writing, photography, and professional material.',
 	url: 'https://nebve.com',
 	indexable: false
 } as const;
