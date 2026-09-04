@@ -3,7 +3,7 @@
 - **Status:** active
 - **Owner:** Nicolas
 - **Started:** 2026-09-04
-- **Last updated:** 2026-09-04
+- **Last updated:** 2026-09-05
 - **Working branch:** `feat/identity-prototype`
 
 This is the running plan for bringing `nebve.com` from the current local prototype to an approved, content-complete static site on Cloudflare Pages. The product baseline remains [vision.md](vision.md), and [voice-and-identity.md](voice-and-identity.md) remains authoritative for public voice and visual direction.
@@ -204,7 +204,7 @@ Representative-batch finding on 2026-09-04: the 27 supplied files are 27 unique 
 These actions require Nicolas's explicit approval when the phase begins.
 
 - [x] Connect the approved GitHub repository and push the reviewed branch. (D-012)
-- [ ] Configure Cloudflare Pages with production branch `main`, build command `npm run build`, output directory `build`, and Node `22.22.2`.
+- [ ] Configure Cloudflare Pages with production branch `main`, build command `npm run build`, output directory `build`, and Node `22.16.0`.
 - [ ] Review a Cloudflare preview deployment on mobile and desktop.
 - [ ] Complete final editorial, image, project-claim, CV, accessibility, and visual approval.
 - [ ] Enable indexing only after all release guards pass.
@@ -240,6 +240,7 @@ These actions require Nicolas's explicit approval when the phase begins.
 | D-010 | 2026-09-04 | Redesign the photography gallery as a tightly fitted grid with each photograph's title overlaid on the image and its caption revealed only through a hover-or-keyboard-focus `i` control, deliberately not a click-to-toggle disclosure. The exact capture timestamp remains in the photo record for sorting but is no longer displayed in the gallery UI.                                                                                                                                                                                                                                                  | Approved gallery treatment; recorded in `voice-and-identity.md`                                        |
 | D-011 | 2026-09-04 | Publish one deliberately unfinished photo essay ("Eyes that pierce the soul," linked to an already-selected gallery photograph) as a real, working example of the skeletal pattern, with an `inProgress` flag surfaced as an "In progress" marker wherever the essay is listed. No essay narrative was invented; the essay body says plainly that the account hasn't been written yet.                                                                                                                                                                                                                      | Approved as a demonstration entry, not a content commitment                                            |
 | D-012 | 2026-09-04 | Created the public `Orkking2/website` GitHub repository as the project's Git source of truth, fast-forwarded `main` to the identity-prototype work, and pushed both `main` and `feat/identity-prototype`. Connecting Cloudflare Pages to this repository and attaching the `nebve.com` custom domain remain Nicolas's to complete in the Cloudflare dashboard — that first connection needs an interactive login, and D-008's open question about which Cloudflare account manages `nebve.com`'s DNS is still unresolved. Exact steps are recorded in the README's "Deploying to Cloudflare Pages" section. | Approved and completed for the GitHub half; Cloudflare connection still pending Nicolas                |
+| D-013 | 2026-09-05 | While connecting Cloudflare Pages, discovered project creation defaulted to a Git-connected Worker (`wrangler deploy`) rather than classic Pages — Cloudflare's dashboard now steers new projects toward Workers. Redirected to Pages explicitly (Workers & Pages → Create application → Pages tab → Connect to Git). Separately, `.node-version` `22.22.2` was pinned to a Node.js patch release with a confirmed upstream-broken bundled npm (missing internal `promise-retry` module, reported independently against Heroku's buildpack, GitHub Actions runner images, and npm/cli — not a Cloudflare-specific bug); repinned to `22.16.0`. | Both fixes applied; Cloudflare Pages connection still pending a successful build |
 
 ## Change log
 
@@ -251,3 +252,4 @@ These actions require Nicolas's explicit approval when the phase begins.
 - **2026-09-04:** Wired 4 owner-reviewed photographs and a real UBQ writing entry into the live catalog, added the UBQ repository link, and deployed a private, non-indexed Cloudflare Pages preview (direct upload, not GitHub-connected) so peers can review identity direction against real content. Noted 2 pre-existing failures in `scripts/photos/core.test.mjs` (coordinate-suggestion migration tests) that predate this change and remain open.
 - **2026-09-04:** Audited public-facing copy for language that read as an internal note to Nicolas rather than the site's own voice, and rewrote it first person with a "Coming soon" bulleted convention (D-009). Redesigned the photography gallery to a tightly fitted grid with overlaid titles and a hover/focus-only caption disclosure, dropped the displayed capture timestamp (D-010), and wired each photo's already-authored `title` field from its private record into the public catalog. Published one deliberately in-progress photo essay as a working example of the pattern (D-011).
 - **2026-09-04:** Created the public `Orkking2/website` GitHub repository, fast-forwarded `main` to the identity-prototype work, and pushed both `main` and `feat/identity-prototype` (D-012). Cloudflare Pages is not yet connected; the README now documents the exact dashboard steps Nicolas needs to complete that connection and attach `nebve.com`.
+- **2026-09-05:** Diagnosed two Cloudflare Pages connection failures with Nicolas: project creation had defaulted to a Worker instead of classic Pages, and `.node-version` was pinned to a Node.js patch with an upstream-broken bundled npm (D-013).

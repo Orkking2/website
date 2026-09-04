@@ -21,7 +21,7 @@ This is a local, content-first prototype—not a launch-ready site.
 
 Prerequisites:
 
-- Node.js `22.22.2` (recorded in `.node-version`)
+- Node.js `22.16.0` (recorded in `.node-version`)
 - npm `12.0.2` (recorded in `package.json`)
 
 ```sh
@@ -103,7 +103,7 @@ The GitHub repository ([`Orkking2/website`](https://github.com/Orkking2/website)
    - **Production branch:** `main`
    - **Build command:** `npm run build`
    - **Build output directory:** `build`
-   - **Node version:** `22.22.2` (an `.node-version` file is already committed; add a `NODE_VERSION` environment variable of the same value if Cloudflare doesn't pick it up automatically)
+   - **Node version:** `22.16.0` (an `.node-version` file is already committed; add a `NODE_VERSION` environment variable of the same value if Cloudflare doesn't pick it up automatically). Do not pin `22.22.2` — that specific patch shipped with a broken bundled npm (missing internal `promise-retry` module, reported against Heroku, GitHub Actions, and npm/cli independently of Cloudflare) that fails any `npm install`/`npm ci`.
    - No environment variables are required for public content.
 
    Cloudflare's generic SvelteKit preset suggests `.svelte-kit/cloudflare` as the output directory — that's the output of `@sveltejs/adapter-cloudflare`. This project deliberately uses `@sveltejs/adapter-static` instead, so the output directory must stay `build`.
