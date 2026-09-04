@@ -3,7 +3,7 @@
 - **Status:** approved creative direction
 - **Approved by:** Nicolas
 - **Approved:** 2026-09-04
-**Applies to:** every public page, article, project, photograph, caption, navigation label, metadata string, and site interaction
+- **Applies to:** every public page, article, project, photograph, caption, navigation label, metadata string, and site interaction
 
 This is the authoritative standard for how `nebve.com` should sound, look, and behave. It turns the purpose recorded in [vision.md](vision.md) into concrete editorial and visual choices. A later explicit decision from Nicolas takes precedence; otherwise, implementation should follow this document rather than extrapolating from the current prototype.
 
