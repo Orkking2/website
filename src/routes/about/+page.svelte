@@ -6,7 +6,7 @@
 
 <PageMeta
 	title="About Me"
-	description="Why Nicolas is building this site, who it is for, and where his approved background and contact details will live."
+	description="Why Nicolas built this site, who it's for, and where his background and contact details will live."
 	path="/about"
 />
 
@@ -15,9 +15,9 @@
 		<p class="eyebrow">About Me</p>
 		<h1>Why this site exists.</h1>
 		<p class="lede">
-			This is a place for Nicolas to distribute work worth sharing: technical ideas explained
-			carefully, photographs given room for their context, and professional information made easy to
-			find. It is meant to be useful before it is impressive.
+			This is where I put work worth sharing: technical ideas explained carefully, photographs given
+			room for their context, and the professional record made easy to find. I'd rather it be useful
+			than impressive.
 		</p>
 	</header>
 
@@ -26,10 +26,10 @@
 		<div>
 			<h2 id="purpose-heading">One site, several conversations.</h2>
 			<p>
-				A learner may arrive looking for an explanation of a concurrent queue. A recruiter or
-				collaborator may need a quick account of the person and the evidence. Someone else may be
-				here for a photograph and its story. Each should find a direct answer and an honest next
-				step.
+				A learner might arrive looking for an explanation of a concurrent queue. A recruiter or
+				collaborator might want a quick account of me and the evidence behind it. Someone else might
+				just be here for a photograph and its story. I want each of them to find a direct answer and
+				an honest next step.
 			</p>
 		</div>
 	</section>
@@ -48,8 +48,8 @@
 			<p class="eyebrow">Recruiter or collaborator</p>
 			<h2>Find the useful version quickly.</h2>
 			<p>
-				The finished About and CV pages will provide a readable professional path without turning
-				the whole site into a résumé.
+				My About and CV pages are still thin, but they're meant to give you a readable professional
+				path without turning the whole site into a résumé.
 			</p>
 			<a class="text-link" href={resolve('/cv')}>Open the CV</a>
 		</article>
@@ -57,43 +57,19 @@
 			<p class="eyebrow">Curious visitor</p>
 			<h2>See what else is worth noticing.</h2>
 			<p>
-				Writing and photography make room for ideas and images that do not belong inside a project
+				Writing and photography make room for ideas and images that don't belong inside a project
 				overview.
 			</p>
 			<a class="text-link" href={resolve('/photography')}>Enter Photography</a>
 		</article>
 	</div>
 
-	<EditorialNotice title="Personal source needed">
-		<p>
-			The proposal establishes the purpose of this site, but not Nicolas’s publishable biography,
-			experience, contact methods, or profile URLs. Those details remain absent until Nicolas
-			provides and approves them.
-		</p>
+	<EditorialNotice title="Coming soon">
+		<p>This page exists before the content does. Here's what I still need to write and approve:</p>
+		<ul class="check-list">
+			<li>A short, first-person biography and background</li>
+			<li>An experience preview that points to the full CV instead of repeating it</li>
+			<li>The contact methods and external profiles I'm comfortable making public</li>
+		</ul>
 	</EditorialNotice>
-
-	<div class="content-grid">
-		<section class="content-card">
-			<div>
-				<p class="eyebrow">Biography / Background</p>
-				<h2>The person behind the work.</h2>
-			</div>
-			<p>A concise first-person account will live here after editorial review.</p>
-		</section>
-		<section class="content-card">
-			<div>
-				<p class="eyebrow">Experience</p>
-				<h2>A useful preview.</h2>
-			</div>
-			<p>This should orient a reader and lead to the full CV rather than duplicate it.</p>
-			<a class="text-link" href={resolve('/cv')}>Review the CV path</a>
-		</section>
-		<section class="content-card">
-			<div>
-				<p class="eyebrow">Contact + external links</p>
-				<h2>A clear next step.</h2>
-			</div>
-			<p>Only owner-approved contact methods and profile URLs will be published.</p>
-		</section>
-	</div>
 </div>

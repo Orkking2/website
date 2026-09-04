@@ -195,8 +195,16 @@ Keep this section focused: a selected gallery plus photo essays. A photo essay m
 - Give every image an `alt` attribute: useful alternative text for a meaningful photograph, or `alt=""` for a truly decorative image. An adjacent description may supplement but does not replace the attribute.
 - Allow distinct captions and longer context; do not force one field to serve all three purposes.
 - Preserve aspect ratios and avoid destructive crops unless Nicolas approves them.
-- Remove or avoid publishing sensitive EXIF location data unless Nicolas explicitly wants it public.
-- Nicolas chooses the photographs and approves their order, captions, and presentation.
+- Strip embedded EXIF location data from every published asset. A reviewed photo record may
+  separately include exact latitude and longitude when Nicolas explicitly enables them for that
+  image; present approved coordinates behind a keyboard-, focus-, click-, and touch-accessible
+  information disclosure rather than hover alone. This stricter rule is specific to exact
+  coordinates; the ordinary per-photo caption disclosure (the small `i` control on a gallery tile)
+  is deliberately simpler — hover or keyboard focus, not a click-to-toggle control.
+- A selected photograph must retain a reviewed capture date and time. Order the main gallery by
+  capture date and time, newest first; photo-essay sequencing remains editorial. The exact
+  timestamp is not displayed in the gallery UI — it stays in the photo record.
+- Nicolas chooses the photographs and approves their captions, crops, metadata, and presentation.
 
 ### CV
 
@@ -331,9 +339,15 @@ location: null # optional and owner-approved
 cover: '/images/photography/supplied-image.jpg'
 featured: false
 draft: true
+inProgress: false # optional; true shows an "In progress" marker wherever the essay is listed
 ```
 
-Each image record should be able to store `src`, `alt`, `caption`, `width`, `height`, and an optional owner-approved location or date. Camera metadata is optional and should not be assumed.
+Each image record should be able to store `src`, an optional `title` (overlaid on the gallery tile),
+`alt`, `caption` (revealed behind the `i` disclosure), `width`, `height`, a required reviewed capture
+date and time, an optional timezone offset, an optional owner-approved location label, and optional
+exact coordinates approved per image. Camera metadata is optional and should not be assumed. Gallery
+order is derived from capture date and time rather than a manual index; the exact capture timestamp
+stays in the record and is not displayed in the gallery UI.
 
 ### Shared data
 
@@ -347,6 +361,7 @@ Keep approved identity, external-profile, contact, navigation, and CV data in de
 - Use progressive disclosure: summary → detail page → paper, repository, documentation, or deeper article.
 - Start with visitor needs and place content where it is canonical; link to it elsewhere instead of duplicating it.
 - Write purposefully, concisely, conversationally, and clearly. Preserve Nicolas's voice rather than replacing it with generic portfolio copy.
+- Write incomplete-section copy in first person, as Nicolas describing his own unfinished site, not as an agent's checklist addressed to Nicolas. Use a plain "Coming soon" label and bulleted list of what will land there, matching the UBQ reading-path pattern, instead of "not supplied," "still needed," or similar process language.
 - Use readable measures and deliberate density. Every non-code word uses the approved Times New Roman system stack. Keep the primary navigation to the five approved sections.
 - Design mobile-first and verify layouts at narrow, medium, and wide widths.
 - Motion must be restrained, optional, and compatible with `prefers-reduced-motion`.

@@ -6,7 +6,7 @@
 		children: Snippet;
 	}
 
-	let { title = 'Content needed', children }: Props = $props();
+	let { title = 'Coming soon', children }: Props = $props();
 </script>
 
 <aside class="editorial-notice" data-editorial-placeholder>

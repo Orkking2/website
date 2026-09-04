@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import EditorialNotice from '$lib/components/EditorialNotice.svelte';
 	import PageMeta from '$lib/components/PageMeta.svelte';
 	import { galleryImages, publishedPhotoEssays } from '$lib/content/catalog';
 
@@ -24,49 +23,52 @@
 		<p class="eyebrow">Photography</p>
 		<h1>The photograph is only half the record.</h1>
 		<p class="lede">
-			A selected image can stand on its own. When the where, when, or why is part of what gives it
-			meaning, a photo essay keeps that context beside it.
+			A selected image can stand on its own. When the where, when, or why matters, a photo essay
+			keeps that context beside it. Hover the <span aria-hidden="true">i</span> on a photograph for its
+			caption.
 		</p>
 	</header>
 
-	{#if galleryImages.length === 0 && essays.length === 0}
-		<EditorialNotice title="Photographs needed">
-			<p>
-				Nicolas still needs to choose the images, order, captions, alternative text, approved
-				metadata, and any permitted crops. No substitute photography has been added.
-			</p>
-		</EditorialNotice>
-	{/if}
-
 	<section aria-labelledby="gallery-heading">
-		<div class="section-heading section-heading--compact">
-			<p class="eyebrow">Selected gallery</p>
-			<div>
-				<h2 id="gallery-heading">A deliberate edit.</h2>
-				<p>
-					The gallery is for a focused sequence, with original aspect ratios and only the public
-					metadata Nicolas approves.
-				</p>
-			</div>
-		</div>
+		<h2 id="gallery-heading" class="visually-hidden">Gallery</h2>
 
 		{#if galleryImages.length > 0}
 			<div class="gallery-grid">
-				{#each galleryImages as photo (photo.src)}
+				{#each galleryImages as photo, index (photo.src)}
 					<figure>
-						<img
-							src={photo.src}
-							alt={photo.decorative ? '' : photo.alt}
-							width={photo.width}
-							height={photo.height}
-							loading="lazy"
-						/>
-						{#if photo.caption}<figcaption>{photo.caption}</figcaption>{/if}
+						<div
+							class="gallery-grid__frame"
+							style={`aspect-ratio: ${photo.width} / ${photo.height}`}
+						>
+							<img
+								src={photo.src}
+								alt={photo.decorative ? '' : photo.alt}
+								width={photo.width}
+								height={photo.height}
+								loading="lazy"
+							/>
+						</div>
+						{#if photo.title}
+							<figcaption><span>{photo.title}</span></figcaption>
+						{/if}
+						{#if photo.caption}
+							<div class="photo-info">
+								<button
+									type="button"
+									class="photo-info__toggle"
+									aria-describedby={`photo-caption-${index}`}
+								>
+									<span aria-hidden="true">i</span>
+									<span class="visually-hidden">Caption</span>
+								</button>
+								<p class="photo-info__caption" id={`photo-caption-${index}`}>{photo.caption}</p>
+							</div>
+						{/if}
 					</figure>
 				{/each}
 			</div>
 		{:else}
-			<p class="empty-state" data-draft-only>Selected photographs will appear here after review.</p>
+			<p class="empty-state" data-draft-only>I haven't selected photographs yet — coming soon.</p>
 		{/if}
 	</section>
 
@@ -76,7 +78,7 @@
 			<h2 id="essays-heading">Images in sequence and context.</h2>
 			<p>
 				An essay may be a sequence with short passages or one photograph with a concise account.
-				Each receives one canonical URL shared with Writing.
+				This is a new part of the site, so expect most essays to start life as works in progress.
 			</p>
 			<a class="text-link" href={resolve('/photography/essays')}>Explore Photo Essays</a>
 		</div>
@@ -85,12 +87,17 @@
 				{#each essays as essay (essay.slug)}
 					<li>
 						<a href={resolve('/photography/essays/[slug]', { slug: essay.slug })}>{essay.title}</a>
-						<time datetime={essay.published}
-							>{dateFormatter.format(new Date(`${essay.published}T00:00:00Z`))}</time
-						>
+						<span class="resource-list__meta">
+							{#if essay.inProgress}<span class="status">In progress</span>{/if}
+							<time datetime={essay.published}
+								>{dateFormatter.format(new Date(`${essay.published}T00:00:00Z`))}</time
+							>
+						</span>
 					</li>
 				{/each}
 			</ul>
+		{:else}
+			<p>I haven't published a photo essay yet — coming soon.</p>
 		{/if}
 	</section>
 </div>

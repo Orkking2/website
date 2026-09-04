@@ -24,8 +24,9 @@
 		<p class="eyebrow">Photography / Photo Essays</p>
 		<h1>Photographs with something to remember.</h1>
 		<p class="lede">
-			A photo essay records the context that would otherwise stay only in the photographer’s
-			imagination. It can be a sequence, a short written account, or one image that asks for both.
+			A photo essay records the context that would otherwise stay only in my head. It can be a
+			sequence, a short written account, or one image that asks for both. This part of the site is
+			new, so treat anything you find here as a work in progress.
 		</p>
 	</header>
 
@@ -40,6 +41,7 @@
 						<h2>
 							<a href={resolve('/photography/essays/[slug]', { slug: essay.slug })}>{essay.title}</a
 							>
+							{#if essay.inProgress}<span class="status">In progress</span>{/if}
 						</h2>
 						<p>{essay.summary}</p>
 					</div>
@@ -47,11 +49,8 @@
 			{/each}
 		</div>
 	{:else}
-		<EditorialNotice>
-			<p>
-				No essay is published yet. A selected sequence, alternative text, captions, contextual
-				writing, real dates, and publication approval are still required.
-			</p>
+		<EditorialNotice title="Coming soon">
+			<p>I haven't published a photo essay yet. Once I do, it'll show up here first.</p>
 		</EditorialNotice>
 	{/if}
 </div>

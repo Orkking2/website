@@ -1,0 +1,31 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-3b949334809c",
+	"status": "draft",
+	"asset": {
+		"master": "../masters/photo-3b949334809c.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Worn with time",
+	"caption": "We look upon the face of a man whose features have been erased by the soles of thousands of shoes. His eyes are disks and his mouth little more than a channel.",
+	"alt": "The tombstone of a holy man whose face has been worn down by visitors of the church wherein he lies.",
+	"decorative": false,
+	"captured": {
+		"local": "2026-07-09T10:30:33",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"gallery": {
+		"included": false
+	},
+	"photoEssay": null,
+	"editorial": {
+		"captionReviewed": true,
+		"captureReviewed": true
+	}
+}

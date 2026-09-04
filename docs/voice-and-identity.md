@@ -93,6 +93,7 @@ These examples illustrate form, not publishable claims.
 - **CV:** explicit and evidence-forward. This is the surface allowed to advocate most directly for Nicolas.
 - **Photography and photo essays:** use the same clear voice. Context may be personal or observational, but no automatic poetic or enigmatic register should be imposed on the images.
 - **Errors and empty states:** plain and useful. Avoid mascot copy, jokes, and fake intimacy.
+- **Incomplete sections:** write in first person, as Nicolas talking about his own unfinished site, not as an agent's note addressed to Nicolas about what he still owes it. Say “I haven't written this yet” rather than “Nicolas still needs to supply this” or “not supplied.” Prefer a short “Coming soon” label and a plain bulleted list of what will land there — the pattern established on the UBQ reading path — over prose that reads like an internal checklist or a build-status report.
 
 ## Visual system
 
@@ -182,8 +183,10 @@ The photography index is a filterless grid of all selected public images. It pre
 
 - Every photograph is clickable and can open in a full-viewport viewer.
 - A gallery tile lifts and gains a link-like border on hover or focus.
-- A photograph with an essay carries a `.txt` marker in its top-left corner. This supplement to shape and text must not rely on color alone.
-- Nicolas controls selection, sequence, captions, crop decisions, and public metadata.
+- Each tile is a tightly fitted crop of the photograph with its title overlaid directly on the image. A small `i` control reveals the caption on hover or keyboard focus; it is deliberately not a click-to-toggle control. A photograph with an essay carries a `.txt` marker in its top-left corner. Neither supplement to shape and text may rely on color alone.
+- Every selected photograph keeps a reviewed capture date and time. The gallery orders images by capture time, newest first, but the exact timestamp is data, not a displayed UI element — it stays in the photo record rather than appearing behind the `i` disclosure. Photo essays retain an explicitly authored sequence.
+- Nicolas controls selection, titles, captions, crop decisions, optional location labels, and whether exact coordinates are public for each image.
+- An approved location label may accompany the caption behind the `i` disclosure when Nicolas adds one; exact coordinates remain data he can choose to publish later rather than a default UI element. Closed information remains public data, not private data.
 
 ### Photo-essay reading behavior
 

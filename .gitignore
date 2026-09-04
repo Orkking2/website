@@ -8,6 +8,9 @@ node_modules
 /.svelte-kit
 /build
 
+# Private photography intake workspace
+/.local/
+
 # OS
 .DS_Store
 Thumbs.db

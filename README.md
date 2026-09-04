@@ -15,7 +15,7 @@ This is a local, content-first prototype—not a launch-ready site.
 - Pages use explicit `noindex, nofollow` metadata, and `robots.txt` blocks crawling.
 - The proposal supports UBQ's general subject and in-progress status. No expanded name, contribution, architecture, results, performance claims, resource links, personal history, contact details, articles, photographs, CV facts, or downloadable CV have been invented.
 - The warm neutral/green theme, large hero, card treatment, background grid, and `N` favicon are provisional and conflict with the approved identity. They remain only because the identity has not yet been implemented.
-- Nothing has been connected to Cloudflare Pages or deployed.
+- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website); pushes to `main` are meant to drive the Cloudflare Pages production deployment once it's connected (see "Deploying to Cloudflare Pages" below). Cloudflare Pages itself has not been connected yet — that step needs an interactive dashboard login and is Nicolas's to complete.
 
 ## Local development
 
@@ -39,6 +39,19 @@ npm run quality
 ```
 
 `npm run build` creates `build/` with static HTML and assets, then verifies all intended routes, essential page metadata, internal page links, release guards, and the top-level `build/404.html`.
+
+## Private photography intake
+
+Phone exports stay outside the repository. The local intake workflow copies them into a Git-ignored inbox, hashes and deduplicates them, reads capture/privacy warnings, creates orientation-correct review images, and supports continuous local review plus explicit draft promotion:
+
+```sh
+npm run photos:spike -- /absolute/path/to/export-folder
+npm run photos:import -- /absolute/path/to/export-folder --batch summer-2026
+npm run photos:review -- --batch summer-2026
+npm run photos:promote -- --batch summer-2026 --dry-run
+```
+
+See [`docs/photography-intake.md`](docs/photography-intake.md) before importing or promoting photographs. Import and review never publish media; promotion creates only unreferenced draft source records and sanitized masters outside `static/`.
 
 ## Architecture
 
@@ -67,7 +80,7 @@ The most useful next step is an owner-approved content packet:
 6. Structured CV facts and the reviewed PDF filename.
 7. Owner review of the remaining prototype gates: exact colors, typography metrics, link motion, article rail, gallery spacing, and photo-essay transition.
 
-Draft metadata belongs in the typed catalog with `draft: true`. Published project entries must have a summary and status; writing and photo essays require valid dates; related-project references, URLs, image paths, dimensions, and alternative text are checked during the build. Photo-essay images may also carry a distinct `context` paragraph array so narrative text does not have to double as a caption or alternative text.
+Draft metadata belongs in the typed catalog with `draft: true`. Published project entries must have a summary and status; writing and photo essays require valid dates; related-project references, URLs, image paths, dimensions, capture date/time, optional coordinates, and alternative text are checked during the build. Gallery images are ordered newest first by capture time. Photo-essay images may also carry a distinct `context` paragraph array so narrative text does not have to double as a caption or alternative text.
 
 ## Launch checklist
 
@@ -81,13 +94,22 @@ Before making the site public:
 6. Change `site.indexable` in `src/lib/data/site.ts` only after featured content is no longer draft. This automatically enables indexable metadata, `robots.txt`, and populated sitemap entries; the launch guard rejects an indexable build with a draft featured project.
 7. Run `npm run quality` and inspect a Cloudflare Pages preview at mobile and desktop sizes.
 
-## Cloudflare Pages settings (when authorized)
+## Deploying to Cloudflare Pages
 
-- Production branch: `main`
-- Build command: `npm run build`
-- Build output directory: `build`
-- Node version: `22.22.2`
-- Environment variables: none required for public content
-- Custom domain: `nebve.com`
+The GitHub repository ([`Orkking2/website`](https://github.com/Orkking2/website)) is the source of truth; Cloudflare Pages still needs to be pointed at it once. That first connection requires an interactive login to the Cloudflare account that manages `nebve.com`'s DNS, so it has to happen in the dashboard rather than from here — see D-008 in `docs/implementation-plan.md` for why the account to use isn't settled yet.
 
-Connecting the GitHub repository, creating the Pages project, attaching `nebve.com`, or changing DNS requires Nicolas's explicit authorization.
+1. In the Cloudflare dashboard, go to **Workers & Pages → Create → Pages → Import an existing Git repository**, and connect the Cloudflare GitHub App to `Orkking2/website` (or reuse an existing installation).
+2. Set the build configuration:
+   - **Production branch:** `main`
+   - **Build command:** `npm run build`
+   - **Build output directory:** `build`
+   - **Node version:** `22.22.2` (an `.node-version` file is already committed; add a `NODE_VERSION` environment variable of the same value if Cloudflare doesn't pick it up automatically)
+   - No environment variables are required for public content.
+
+   Cloudflare's generic SvelteKit preset suggests `.svelte-kit/cloudflare` as the output directory — that's the output of `@sveltejs/adapter-cloudflare`. This project deliberately uses `@sveltejs/adapter-static` instead, so the output directory must stay `build`.
+
+3. Save and deploy. The first build runs against `main` immediately and becomes the project's production deployment at its `*.pages.dev` subdomain.
+4. Once that first build succeeds, open the project's **Custom domains** tab and attach `nebve.com`, following [Cloudflare's custom-domain guide](https://developers.cloudflare.com/pages/configuration/custom-domains/). Decide deliberately what the `www` hostname and the `*.pages.dev` subdomain should do (redirect to `https://nebve.com`, or stay inactive) rather than leaving several canonical-looking hostnames live at once.
+5. From then on, every push to `main` triggers a new production build and deploy with no further action; every other branch and pull request gets its own preview-deployment URL from the same connection. `static/_headers` sets `Cache-Control: public, max-age=0, must-revalidate` on HTML so a reload after a deploy always serves the new build, while hashed `/_app/immutable/*` assets are cached for a year since a new build gives them new filenames.
+
+Indexing stays off (`site.indexable = false` in `src/lib/data/site.ts`, `noindex, nofollow` metadata, `robots.txt` disallow) until Nicolas explicitly flips it — attaching the domain makes the site reachable, not indexed.

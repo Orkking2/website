@@ -58,18 +58,20 @@
 			</div>
 		</section>
 	{:else}
-		<EditorialNotice title="Writing still in development">
-			<p>
-				No article is presented as published. Finished copy still needs an approved summary, real
-				publication date, and editorial sign-off before it receives a public URL.
-			</p>
+		<EditorialNotice title="Coming soon">
+			<p>I haven't finished an article yet, but here's what I'm working on:</p>
+			<ul class="check-list">
+				{#each plannedWriting as title (title)}<li>{title}</li>{/each}
+			</ul>
 		</EditorialNotice>
+	{/if}
 
+	{#if articles.length > 0 && plannedWriting.length > 0}
 		<section class="workbench" aria-labelledby="workbench-heading" data-draft-only>
 			<div>
-				<p class="eyebrow">Editorial view</p>
-				<h2 id="workbench-heading">Planned lines of inquiry.</h2>
-				<p>These working titles are topics, not promises of finished articles.</p>
+				<p class="eyebrow">Coming soon</p>
+				<h2 id="workbench-heading">More lines of inquiry.</h2>
+				<p>These working titles are topics I'm exploring, not promises of finished articles.</p>
 			</div>
 			<ol class="planned-list">
 				{#each plannedWriting as title, index (title)}
@@ -94,7 +96,10 @@
 				{#each essays as essay (essay.slug)}
 					<li>
 						<a href={resolve('/photography/essays/[slug]', { slug: essay.slug })}>{essay.title}</a>
-						<time datetime={essay.published}>{formatDate(essay.published)}</time>
+						<span class="resource-list__meta">
+							{#if essay.inProgress}<span class="status">In progress</span>{/if}
+							<time datetime={essay.published}>{formatDate(essay.published)}</time>
+						</span>
 					</li>
 				{/each}
 			</ul>

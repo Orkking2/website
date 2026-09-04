@@ -14,12 +14,13 @@
 	<header class="page-intro">
 		<p class="eyebrow">
 			Photo Essay · <time datetime={data.essay.published}>{data.essay.published}</time>
+			{#if data.essay.inProgress}<span class="status">In progress</span>{/if}
 		</p>
 		<h1>{data.essay.title}</h1>
 		<p class="lede">{data.essay.summary}</p>
 	</header>
 
-	<div class="prose">
+	<div class="prose" data-draft-only={data.essay.inProgress ? true : undefined}>
 		{#each data.essay.body as paragraph, index (index)}
 			<p>{paragraph}</p>
 		{/each}

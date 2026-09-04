@@ -7,11 +7,110 @@
 			"status": "In development",
 			"featured": true,
 			"tags": ["unbounded MPMC FIFO"],
-			"links": { "paper": null, "code": null, "docs": null, "demo": null },
+			"links": {
+				"paper": null,
+				"code": "https://github.com/Orkking2/ubq",
+				"docs": null,
+				"demo": null
+			},
 			"draft": true
 		}
 	],
-	"writing": [],
-	"photoEssays": [],
-	"galleryImages": []
+	"writing": [
+		{
+			"title": "How UBQ Reserves Producer Slots Without Locks",
+			"slug": "how-ubq-reserves-producer-slots",
+			"summary": "UBQ links fixed-size blocks of queue slots instead of individual nodes, so an ordinary push touches one atomic counter instead of the whole list. Here is how that reservation works, and why it only gets expensive at a block boundary.",
+			"published": "2026-09-04",
+			"tags": ["UBQ", "concurrency", "lock-free"],
+			"relatedProjects": ["ubq"],
+			"featured": true,
+			"draft": false,
+			"cover": null,
+			"body": [
+				"Most concurrent FIFO queues borrow the same idea: producers append values, consumers remove the oldest one, and the tricky part is making many threads do that safely at once. The textbook lock-free design links one node per element onto a linked list — simple, and naturally unbounded, but every single push and pop touches the machinery of that list: an allocation, a pointer update, and eventually a reclamation step. UBQ keeps the unbounded, linked shape of that design but changes what gets linked. Instead of one node per value, it links fixed-size blocks that each hold many values, and it tries to make an ordinary push or pop touch as little shared state as possible.",
+				"A block is a small, fixed-capacity array of slots plus a pointer to whatever block comes next. Pushing a value normally means three things: claim a slot in the current block, write the value into it, and mark that slot written. Nothing about that path allocates memory or changes the block's own linked-list structure — the only shared state involved is a single counter that says which slot is next.",
+				"That counter is the producer head, and UBQ claims a slot from it with one fetch-and-add rather than a compare-and-swap loop. A fetch-and-add always returns a distinct value to every caller, so there's no retry-on-conflict the way there is with CAS: whichever slot index a thread gets back is the one it owns, full stop. To avoid a second atomic variable for “which block,” UBQ packs the block's address and the in-block slot index into a single pointer-width word, using the low bits an aligned block address leaves unused. One atomic word, one instruction, one reserved slot.",
+				"The interesting work only happens at the edge of a block. Whichever producer's fetch-and-add happens to return the final slot in a block becomes responsible for the block's structural upkeep: it allocates or recycles the next block, links it in, and publishes it as the new producer head so later pushes have somewhere to land. Every other producer in that block just writes its value and moves on. The cost of growing the queue is real, but it's paid once per block instead of once per element — the larger the block, the more that cost gets amortized away.",
+				"Consumers follow the same slot-index-in-a-block shape on the way out, but they can't use a plain fetch-and-add the way producers do — a consumer first has to make sure a producer has actually reserved the slot it's about to claim, or it would run ahead of the queue. That check, and what happens at the equivalent block boundary on the consumer side, is its own piece of the design worth a separate article.",
+				"This description reflects UBQ's current internal design notes, which are still evolving — the reservation mechanism above is stable, but the surrounding write-up is out of date in places and hasn't been through a proper external review. The correctness argument, memory reclamation, and real throughput numbers against other MPMC queues are deliberately left out of this piece for that reason; they'll get their own articles once they're in a state worth standing behind."
+			]
+		}
+	],
+	"photoEssays": [
+		{
+			"title": "Eyes that pierce the soul",
+			"slug": "eyes-that-pierce-the-soul",
+			"summary": "I haven't written the account behind this photograph yet. This entry exists to show the shape a photo essay will take before the words are ready.",
+			"published": "2026-09-04",
+			"location": null,
+			"cover": "/images/photography/photo-ebc2cdc7af24.jpg",
+			"featured": false,
+			"draft": false,
+			"inProgress": true,
+			"body": [
+				"The account for this photograph hasn't been written yet. I'm publishing the essay in this unfinished state on purpose, so a photo essay has a real, working example instead of only a promise of one."
+			],
+			"images": [
+				{
+					"src": "/images/photography/photo-ebc2cdc7af24.jpg",
+					"title": "Eyes that pierce the soul",
+					"alt": "A little boy with blue eyes gazes at you.",
+					"caption": "His eyes feel empty as he gazes upon you, his blue eyes looking beyond the surface.",
+					"width": 2400,
+					"height": 3200,
+					"location": null,
+					"capturedAt": "2026-07-02T12:16:53",
+					"capturedOffset": "+02:00"
+				}
+			]
+		}
+	],
+	"galleryImages": [
+		{
+			"src": "/images/photography/photo-6267fdbfc568.jpg",
+			"title": "The Cottage",
+			"alt": "",
+			"caption": "The painting, \"The Cottage\", in a museum, pointed at by a finger.",
+			"width": 3200,
+			"height": 2400,
+			"location": null,
+			"capturedAt": "2026-07-03T19:52:06",
+			"capturedOffset": "+02:00",
+			"decorative": true
+		},
+		{
+			"src": "/images/photography/photo-864bd0829d56.jpg",
+			"title": "A small car",
+			"alt": "A very small car next to a door, under an overhang.",
+			"caption": null,
+			"width": 2400,
+			"height": 3200,
+			"location": null,
+			"capturedAt": "2026-07-02T17:16:19",
+			"capturedOffset": "+02:00"
+		},
+		{
+			"src": "/images/photography/photo-dacd5434e94d.jpg",
+			"title": "Sexy Jesus",
+			"alt": "Jesus is posed as though hung on the cross, but no cross is present. He is limp and wracked with pain, mouth open.",
+			"caption": "Is it just me, or is Jesus flirting with me?",
+			"width": 2400,
+			"height": 3200,
+			"location": null,
+			"capturedAt": "2026-07-02T11:43:10",
+			"capturedOffset": "+02:00"
+		},
+		{
+			"src": "/images/photography/photo-ebc2cdc7af24.jpg",
+			"title": "Eyes that pierce the soul",
+			"alt": "A little boy with blue eyes gazes at you.",
+			"caption": "His eyes feel empty as he gazes upon you, his blue eyes looking beyond the surface.",
+			"width": 2400,
+			"height": 3200,
+			"location": null,
+			"capturedAt": "2026-07-02T12:16:53",
+			"capturedOffset": "+02:00"
+		}
+	]
 }

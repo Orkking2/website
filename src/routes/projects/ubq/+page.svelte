@@ -46,8 +46,8 @@
 				<p class="eyebrow">Orient</p>
 				<h2 id="ubq-orient-heading">What kind of problem is this?</h2>
 				<p>
-					UBQ is concerned with unbounded multi-producer, multi-consumer FIFO queues. The finished
-					overview will explain that problem in plain language before introducing the algorithm.
+					UBQ is concerned with unbounded multi-producer, multi-consumer FIFO queues. I'll explain
+					that problem in plain language here before introducing the algorithm.
 				</p>
 			</section>
 		</li>
@@ -58,8 +58,8 @@
 				<p class="eyebrow">Use</p>
 				<h2 id="ubq-use-heading">What does the public interface do?</h2>
 				<p>
-					This layer will introduce the smallest useful vocabulary and concrete behavior of UBQ’s
-					public interface. Exact API details will appear only from authoritative project material.
+					I'll introduce the smallest useful vocabulary and concrete behavior of UBQ's public
+					interface here, once the API itself has settled enough to describe honestly.
 				</p>
 			</section>
 		</li>
@@ -70,9 +70,9 @@
 				<p class="eyebrow">Inspect</p>
 				<h2 id="ubq-inspect-heading">Why is it designed this way?</h2>
 				<p>
-					The deeper account can make the algorithms, trade-offs, experiments, and failed approaches
-					legible through focused prose and visual explanations. No architecture or performance
-					result is asserted until it has a supplied source.
+					I want the deeper account to make the algorithms, trade-offs, experiments, and failed
+					approaches legible through focused prose and original diagrams. I won't assert an
+					architecture or performance result here until I can point to where it came from.
 				</p>
 			</section>
 		</li>
@@ -92,7 +92,7 @@
 									{#if resource.url}
 										<a class="external-link" href={resource.url} rel="external">Open resource</a>
 									{:else}
-										<span class="status">Not supplied</span>
+										<span class="status">Coming soon</span>
 									{/if}
 								</li>
 							{/each}
@@ -109,7 +109,7 @@
 								{/each}
 							</ul>
 						{:else}
-							<p>Published entries related through validated metadata will collect here.</p>
+							<p>I haven't published any UBQ-related articles yet — coming soon.</p>
 						{/if}
 						<a class="text-link" href={resolve('/writing')}>Explore Writing</a>
 					</div>
@@ -118,10 +118,14 @@
 		</li>
 	</ol>
 
-	<EditorialNotice title="Authoritative project material needed">
-		<p>
-			The next content pass needs Nicolas’s approved overview, contribution, API description,
-			technical claims, figures, and real paper, code, and documentation URLs.
-		</p>
+	<EditorialNotice title="Coming soon">
+		<p>This page is still thin. Here's what I still need to write and link:</p>
+		<ul class="check-list">
+			<li>A plain-language overview of the problem UBQ solves</li>
+			<li>My contribution and role, stated plainly</li>
+			<li>The public API description and a worked example</li>
+			<li>Technical claims and figures, once they're ready to stand behind</li>
+			<li>The paper and docs.rs links</li>
+		</ul>
 	</EditorialNotice>
 </article>

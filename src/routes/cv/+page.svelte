@@ -15,9 +15,8 @@
 		<p class="eyebrow">CV</p>
 		<h1>The short path through the work.</h1>
 		<p class="lede">
-			For a recruiter or collaborator, this page is meant to do the practical work of a business
-			card: establish context quickly, make the evidence easy to reach, and provide a clear next
-			step.
+			For a recruiter or collaborator, I want this page to do the practical work of a business card:
+			establish context quickly, make the evidence easy to reach, and give you a clear next step.
 		</p>
 	</header>
 
@@ -27,16 +26,19 @@
 			<h2 id="cv-standard-heading">Readable. Informative. Efficient.</h2>
 		</div>
 		<p>
-			The HTML version will be the primary accessible record. A separately reviewed PDF will be an
+			The HTML version will be the primary accessible record. I'll also keep a reviewed PDF as an
 			obvious download, not the only way to read the information.
 		</p>
 	</section>
 
-	<EditorialNotice title="Authoritative CV needed">
-		<p>
-			No employers, dates, roles, education, achievements, contact details, or approved PDF are in
-			the repository. The proposal establishes this page’s purpose, but not those facts.
-		</p>
+	<EditorialNotice title="Coming soon">
+		<p>I haven't put a CV here yet. Once it's ready, this page will include:</p>
+		<ul class="check-list">
+			<li>Employers, roles, and dates</li>
+			<li>Education and relevant achievements</li>
+			<li>Approved contact details</li>
+			<li>A downloadable, reviewed PDF</li>
+		</ul>
 	</EditorialNotice>
 
 	<div class="content-grid">
@@ -46,8 +48,8 @@
 				<h2>Fast to scan on any screen.</h2>
 			</div>
 			<p>
-				Structured experience data can also power a shorter About preview without allowing dates or
-				descriptions to drift.
+				The same structured experience data will also power a shorter preview on About, so the two
+				pages can't drift out of sync.
 			</p>
 			<a class="text-link" href={resolve('/about')}>Return to About Me</a>
 		</section>
@@ -56,7 +58,7 @@
 				<p class="eyebrow">Reviewed PDF</p>
 				<h2>A direct download.</h2>
 			</div>
-			<p>The link will appear only after an approved PDF and filename exist in the repository.</p>
+			<p>The link will appear here once I've approved a PDF and added it.</p>
 		</section>
 	</div>
 </div>

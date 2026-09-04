@@ -77,7 +77,6 @@ export const projectDepths = [
 ] as const;
 
 export const plannedWriting = [
-	'How UBQ Reserves Producer Slots Without Locks',
 	'Benchmarking an Unbounded MPMC Queue on Arm',
 	'Memory Reclamation',
 	'Contention and Block-Based Queues',

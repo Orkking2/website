@@ -36,11 +36,15 @@
 		<a class="text-link" href={resolve('/projects/ubq')}>Begin with the overview</a>
 	</article>
 
-	<EditorialNotice title="Project evidence needed">
+	<EditorialNotice title="Coming soon">
 		<p>
-			The proposal supports UBQ’s subject and in-progress status. Its expanded name, Nicolas’s exact
-			contribution, architecture, results, paper, repository, and docs.rs URLs have not been
-			supplied and are not claimed here.
+			UBQ is real and in progress, but I'm not ready to make claims beyond that yet. Still coming:
 		</p>
+		<ul class="check-list">
+			<li>What the name stands for</li>
+			<li>My exact contribution and role</li>
+			<li>Architecture and results, once I can stand behind them</li>
+			<li>The paper and docs.rs links</li>
+		</ul>
 	</EditorialNotice>
 </div>

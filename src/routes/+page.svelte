@@ -1,19 +1,22 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import PageMeta from '$lib/components/PageMeta.svelte';
-	import { getProject } from '$lib/content/catalog';
+	import { galleryImages, getProject, publishedWritingEntries } from '$lib/content/catalog';
 	import { site } from '$lib/data/site';
 	import { plannedWriting } from '$lib/data/vision';
 
 	const ubq = getProject('ubq');
-	const writingPreview = plannedWriting.slice(0, 3);
+	const publishedWritingPreview = publishedWritingEntries
+		.toSorted((a, b) => b.published.localeCompare(a.published))
+		.slice(0, 3);
+	const plannedWritingPreview = plannedWriting.slice(0, 3 - publishedWritingPreview.length);
 </script>
 
 <PageMeta title={site.name} description={site.description} path="/" />
 
 <div class="page-shell home-index" data-identity-prototype data-draft-only>
 	<header class="home-index__intro">
-		<p class="index-label">Index / identity prototype</p>
+		<p class="index-label">Index</p>
 		<h1>Technical work, writing, and photography.</h1>
 		<p>
 			An evolving record of research, explanations, and photographs. Each entry begins with a
@@ -47,9 +50,20 @@
 			</header>
 
 			<ol class="working-index">
-				{#each writingPreview as title, index (title)}
+				{#each publishedWritingPreview as entry, index (entry.slug)}
 					<li>
 						<span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+						<div>
+							<p><a href={resolve('/writing/[slug]', { slug: entry.slug })}>{entry.title}</a></p>
+							<small>Published</small>
+						</div>
+					</li>
+				{/each}
+				{#each plannedWritingPreview as title, index (title)}
+					<li>
+						<span aria-hidden="true"
+							>{String(publishedWritingPreview.length + index + 1).padStart(2, '0')}</span
+						>
 						<div>
 							<p>{title}</p>
 							<small>Working topic</small>
@@ -70,11 +84,21 @@
 			</header>
 
 			<div class="photography-index">
-				<p class="entry-meta">Selection in progress</p>
-				<p>
-					A filterless gallery will preserve the proportions of selected photographs. Images with
-					additional context will lead to a canonical photo essay.
-				</p>
+				{#if galleryImages.length > 0}
+					<p class="entry-meta">
+						{galleryImages.length} selected photograph{galleryImages.length === 1 ? '' : 's'}
+					</p>
+					<p>
+						A filterless gallery preserves the proportions of selected photographs. Images with
+						additional context lead to a canonical photo essay.
+					</p>
+				{:else}
+					<p class="entry-meta">Selection in progress</p>
+					<p>
+						A filterless gallery will preserve the proportions of selected photographs. Images with
+						additional context will lead to a canonical photo essay.
+					</p>
+				{/if}
 			</div>
 
 			<a class="index-link" href={resolve('/photography')}>

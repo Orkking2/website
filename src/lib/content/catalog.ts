@@ -40,19 +40,26 @@ export interface PhotoEssayEntry {
 	cover: string;
 	featured: boolean;
 	draft: boolean;
+	inProgress?: boolean;
 	body: string[];
 	images: GalleryImage[];
 }
 
 export interface GalleryImage {
 	src: string;
+	title?: string | null;
 	alt: string;
 	caption: string | null;
 	context?: string[];
 	width: number;
 	height: number;
-	location?: string;
-	date?: string;
+	location?: string | null;
+	capturedAt: string;
+	capturedOffset?: string | null;
+	coordinates?: {
+		latitude: number;
+		longitude: number;
+	} | null;
 	decorative?: boolean;
 }
 
@@ -66,10 +73,22 @@ const rawCatalog = catalogData as unknown as {
 export const projects = rawCatalog.projects;
 export const writingEntries = rawCatalog.writing;
 export const photoEssays = rawCatalog.photoEssays;
-export const galleryImages = rawCatalog.galleryImages;
+export const galleryImages = rawCatalog.galleryImages.toSorted(
+	(left, right) =>
+		captureSortValue(right) - captureSortValue(left) || left.src.localeCompare(right.src)
+);
 
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+const localDateTimePattern = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
+const offsetPattern = /^[+-](?:0\d|1[0-4]):[0-5]\d$/;
+
+function captureSortValue(image: GalleryImage) {
+	const timestamp = Date.parse(
+		image.capturedAt + (image.capturedOffset || (image.capturedAt ? 'Z' : ''))
+	);
+	return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp;
+}
 
 function assertNonEmptyString(value: unknown, context: string): asserts value is string {
 	if (typeof value !== 'string' || !value.trim()) {
@@ -111,6 +130,23 @@ function assertDate(value: string, context: string) {
 	}
 }
 
+function assertLocalDateTime(value: string, context: string) {
+	const match = localDateTimePattern.exec(value);
+	if (!match) throw new Error(`${context}: expected an ISO local date and time.`);
+	const [year, month, day, hour, minute, second] = match.slice(1).map((part) => Number(part || 0));
+	const parsed = new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+	if (
+		parsed.getUTCFullYear() !== year ||
+		parsed.getUTCMonth() !== month - 1 ||
+		parsed.getUTCDate() !== day ||
+		parsed.getUTCHours() !== hour ||
+		parsed.getUTCMinutes() !== minute ||
+		parsed.getUTCSeconds() !== second
+	) {
+		throw new Error(`${context}: invalid capture date and time "${value}".`);
+	}
+}
+
 function assertExternalUrl(value: string, context: string) {
 	const url = new URL(value);
 	if (url.protocol !== 'https:' && url.protocol !== 'http:') {
@@ -120,6 +156,9 @@ function assertExternalUrl(value: string, context: string) {
 
 function validateImage(image: GalleryImage, context: string) {
 	assertNonEmptyString(image.src, `${context} src`);
+	if (image.title !== undefined && image.title !== null) {
+		assertNonEmptyString(image.title, `${context} image "${image.src}" title`);
+	}
 	if (typeof image.alt !== 'string') {
 		throw new Error(`${context}: image "${image.src}" requires an alt field.`);
 	}
@@ -148,8 +187,28 @@ function validateImage(image: GalleryImage, context: string) {
 	if (!image.decorative && !image.alt.trim()) {
 		throw new Error(`${context}: meaningful image "${image.src}" requires alternative text.`);
 	}
-	if (image.location !== undefined) assertNonEmptyString(image.location, `${context} location`);
-	if (image.date !== undefined) assertDate(image.date, `${context} date`);
+	if (image.location !== undefined && image.location !== null) {
+		assertNonEmptyString(image.location, `${context} location`);
+	}
+	assertLocalDateTime(image.capturedAt, `${context} image "${image.src}" capturedAt`);
+	if (image.capturedOffset !== undefined && image.capturedOffset !== null) {
+		if (!offsetPattern.test(image.capturedOffset)) {
+			throw new Error(`${context}: image "${image.src}" has an invalid capture offset.`);
+		}
+	}
+	if (image.coordinates !== undefined && image.coordinates !== null) {
+		const { latitude, longitude } = image.coordinates;
+		if (
+			!Number.isFinite(latitude) ||
+			latitude < -90 ||
+			latitude > 90 ||
+			!Number.isFinite(longitude) ||
+			longitude < -180 ||
+			longitude > 180
+		) {
+			throw new Error(`${context}: image "${image.src}" has invalid public coordinates.`);
+		}
+	}
 }
 
 function validateCatalog() {
@@ -226,6 +285,9 @@ function validateCatalog() {
 		assertStringArray(essay.body, `photo-essays/${essay.slug} body`);
 		if (typeof essay.featured !== 'boolean' || typeof essay.draft !== 'boolean') {
 			throw new Error(`photo-essays/${essay.slug}: featured and draft must be booleans.`);
+		}
+		if (essay.inProgress !== undefined && typeof essay.inProgress !== 'boolean') {
+			throw new Error(`photo-essays/${essay.slug}: inProgress must be a boolean.`);
 		}
 		if (!Array.isArray(essay.images)) {
 			throw new Error(`photo-essays/${essay.slug}: images must be an array.`);
