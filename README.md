@@ -1,6 +1,6 @@
 # nebve.com
 
-Nicolas's personal website for research and projects, technical writing, photography, and a web-readable CV. The repository is the content source of truth; SvelteKit prerenders it to static files for Cloudflare Pages.
+Nicolas's personal website for research and projects, technical writing, photography, and a web-readable CV. The repository is the content source of truth; SvelteKit prerenders it to static files served by Cloudflare Workers (configured for static assets only — see "Deploying to Cloudflare Workers" below for why this isn't classic Cloudflare Pages).
 
 The active implementation sequence, approval gates, content dependencies, and decision log are maintained in [`docs/implementation-plan.md`](docs/implementation-plan.md).
 
@@ -15,13 +15,13 @@ This is a local, content-first prototype—not a launch-ready site.
 - Pages use explicit `noindex, nofollow` metadata, and `robots.txt` blocks crawling.
 - The proposal supports UBQ's general subject and in-progress status. No expanded name, contribution, architecture, results, performance claims, resource links, personal history, contact details, articles, photographs, CV facts, or downloadable CV have been invented.
 - The warm neutral/green theme, large hero, card treatment, background grid, and `N` favicon are provisional and conflict with the approved identity. They remain only because the identity has not yet been implemented.
-- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website); pushes to `main` are meant to drive the Cloudflare Pages production deployment once it's connected (see "Deploying to Cloudflare Pages" below). Cloudflare Pages itself has not been connected yet — that step needs an interactive dashboard login and is Nicolas's to complete.
+- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website); pushes to `main` are meant to drive the Cloudflare Workers production deployment once it's connected (see "Deploying to Cloudflare Workers" below). Cloudflare itself has not finished connecting yet — that step needs an interactive dashboard login and is Nicolas's to complete.
 
 ## Local development
 
 Prerequisites:
 
-- Node.js `22.23.2` (recorded in `.node-version`)
+- Node.js `24.20.0` (recorded in `.node-version`), the current Active LTS line
 - npm `12.0.2` (recorded in `package.json`)
 
 ```sh
@@ -58,7 +58,7 @@ See [`docs/photography-intake.md`](docs/photography-intake.md) before importing 
 - Framework: SvelteKit with TypeScript
 - Rendering: static prerendering with SSR kept on during the build and client-side rendering disabled for the current non-interactive prototype
 - Adapter: `@sveltejs/adapter-static` with strict prerender validation
-- Output: `build`
+- Output: `build`, deployed as Cloudflare Workers static assets per `wrangler.jsonc` (`assets.directory`) — no Worker script, no dynamic backend
 - Content: authored data in `src/content/catalog.json`, checked by the typed build-time model in `src/lib/content/catalog.ts`; no database, CMS, API, or runtime content fetch
 - Editorial direction: `docs/vision.md` records the authority map; `docs/voice-and-identity.md` is the approved voice and identity standard
 - Route manifest: `src/lib/data/routes.json`, shared by navigation, discovery files, and output verification
@@ -66,7 +66,7 @@ See [`docs/photography-intake.md`](docs/photography-intake.md) before importing 
 
 Dynamic Writing and Photo Essay routes export their published slugs for prerendering. Their route templates are the only unseen routes permitted when those collections are empty; every real published entry must still generate static output.
 
-The project follows the official [SvelteKit static-site guidance](https://svelte.dev/docs/kit/adapter-static). Cloudflare's generic SvelteKit preset normally suggests `.svelte-kit/cloudflare`; this repository deliberately uses the static adapter, so the Pages output directory must be `build`.
+The project follows the official [SvelteKit static-site guidance](https://svelte.dev/docs/kit/adapter-static). `@sveltejs/adapter-cloudflare` (a separate package, listed as an unused devDependency) would output to `.svelte-kit/cloudflare` for SSR-on-Workers deployments; this repository deliberately uses `@sveltejs/adapter-static` instead, so `wrangler.jsonc` points `assets.directory` at `build`.
 
 ## Content needed next
 
@@ -92,24 +92,26 @@ Before making the site public:
 4. Add and review a social-preview image.
 5. Confirm the `LICENSE` attribution (`Orkking2`) is intentional.
 6. Change `site.indexable` in `src/lib/data/site.ts` only after featured content is no longer draft. This automatically enables indexable metadata, `robots.txt`, and populated sitemap entries; the launch guard rejects an indexable build with a draft featured project.
-7. Run `npm run quality` and inspect a Cloudflare Pages preview at mobile and desktop sizes.
+7. Run `npm run quality` and inspect a Cloudflare Workers preview at mobile and desktop sizes.
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare Workers
 
-The GitHub repository ([`Orkking2/website`](https://github.com/Orkking2/website)) is the source of truth; Cloudflare Pages still needs to be pointed at it once. That first connection requires an interactive login to the Cloudflare account that manages `nebve.com`'s DNS, so it has to happen in the dashboard rather than from here — see D-008 in `docs/implementation-plan.md` for why the account to use isn't settled yet.
+This project deploys as a Cloudflare Worker configured for **static assets only** — `wrangler.jsonc` has no `main` script, so requests never reach a Worker script at all; Cloudflare serves the prerendered `build` directory directly. This is deliberate, not a workaround: Cloudflare's dashboard now defaults new "Workers & Pages" project creation to a Git-connected Worker rather than classic Pages, and Cloudflare's own documentation describes Workers as its primary platform going forward. A static-assets Worker is architecturally identical to what Pages provided here — same static output, no server code, no backend — so there's no reason to fight the platform's default.
 
-1. In the Cloudflare dashboard, go to **Workers & Pages → Create → Pages → Import an existing Git repository**, and connect the Cloudflare GitHub App to `Orkking2/website` (or reuse an existing installation).
+The GitHub repository ([`Orkking2/website`](https://github.com/Orkking2/website)) is the source of truth; Cloudflare still needs to be pointed at it. That first connection requires an interactive login to the Cloudflare account that manages `nebve.com`'s DNS, so it has to happen in the dashboard rather than from here — see D-008 in `docs/implementation-plan.md` for why the account to use isn't settled yet.
+
+1. In the Cloudflare dashboard, go to **Workers & Pages → Create application**, connect the Cloudflare GitHub App to `Orkking2/website` (or reuse an existing installation), and let it create a Worker (this is the correct, expected path — don't redirect to the Pages tab).
 2. Set the build configuration:
    - **Production branch:** `main`
    - **Build command:** `npm run build`
-   - **Build output directory:** `build`
-   - **Node version:** `22.23.2` (an `.node-version` file is already committed; add a `NODE_VERSION` environment variable of the same value if Cloudflare doesn't pick it up automatically). Avoid `22.22.2` specifically — that patch shipped with a broken bundled npm (missing internal `promise-retry` module, reported against Heroku, GitHub Actions, and npm/cli independently of Cloudflare) that fails any `npm install`/`npm ci`; it was fixed in `22.22.3`. `packageManager` in `package.json` pins `npm@12.0.2`, which itself requires Node `^22.22.2 || ^24.15.0 || >=26.0.0` — so within the Node 22 line, any patch from `22.22.2` onward satisfies it, but only `22.22.3+` avoids the bundled-npm bug.
+   - **Deploy command:** `npx wrangler deploy` (Cloudflare's default; it reads `wrangler.jsonc`, so no build-output-directory field is needed here)
+   - **Root directory:** `/`
    - No environment variables are required for public content.
+   - **Node version:** `24.20.0` (an `.node-version` file is already committed; add a `NODE_VERSION` environment variable of the same value if Cloudflare doesn't pick it up automatically). This repo was previously pinned to the Node 22 line and hit two chained failures worth knowing about if a future Node bump reintroduces them: `22.22.2` shipped with a broken bundled npm (missing internal `promise-retry`, fixed in `22.22.3` — see Node's own changelog, `deps: upgrade npm to 10.9.8`), and separately `packageManager`'s pinned `npm@12.0.2` requires Node `^22.22.2 || ^24.15.0 || >=26.0.0` — Node 24 (the current Active LTS line) clears both issues at once rather than chasing a narrow compatible patch within Node 22.
+3. Save and deploy. The first build runs against `main` immediately and becomes the project's production deployment at its `*.workers.dev` subdomain.
+4. Once that first build succeeds, go to the project's **Settings → Domains & Routes → Add → Custom Domain** and attach `nebve.com`, following [Cloudflare's Workers custom-domain guide](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/). Decide deliberately what the `www` hostname and the `*.workers.dev` subdomain should do (redirect to `https://nebve.com`, or stay inactive) rather than leaving several canonical-looking hostnames live at once.
+5. From then on, every push to `main` triggers a new production build and deploy with no further action; every other branch and pull request gets its own preview-deployment URL from the same connection. `static/_headers` sets `Cache-Control: public, max-age=0, must-revalidate` on HTML so a reload after a deploy always serves the new build, while hashed `/_app/immutable/*` assets are cached for a year since a new build gives them new filenames. Both `_headers` and `_redirects` in `static/` are honored by Workers static assets the same way they were under Pages.
 
-   Cloudflare's generic SvelteKit preset suggests `.svelte-kit/cloudflare` as the output directory — that's the output of `@sveltejs/adapter-cloudflare`. This project deliberately uses `@sveltejs/adapter-static` instead, so the output directory must stay `build`.
-
-3. Save and deploy. The first build runs against `main` immediately and becomes the project's production deployment at its `*.pages.dev` subdomain.
-4. Once that first build succeeds, open the project's **Custom domains** tab and attach `nebve.com`, following [Cloudflare's custom-domain guide](https://developers.cloudflare.com/pages/configuration/custom-domains/). Decide deliberately what the `www` hostname and the `*.pages.dev` subdomain should do (redirect to `https://nebve.com`, or stay inactive) rather than leaving several canonical-looking hostnames live at once.
-5. From then on, every push to `main` triggers a new production build and deploy with no further action; every other branch and pull request gets its own preview-deployment URL from the same connection. `static/_headers` sets `Cache-Control: public, max-age=0, must-revalidate` on HTML so a reload after a deploy always serves the new build, while hashed `/_app/immutable/*` assets are cached for a year since a new build gives them new filenames.
+Local sanity-checks before pushing: `npx wrangler deploy --dry-run` validates `wrangler.jsonc` and lists what would be uploaded without deploying anything; `npm run deploy` runs the real `wrangler deploy` (requires being logged in via `npx wrangler login` first) if a manual deploy from a local machine is ever needed outside the GitHub-connected flow.
 
 Indexing stays off (`site.indexable = false` in `src/lib/data/site.ts`, `noindex, nofollow` metadata, `robots.txt` disallow) until Nicolas explicitly flips it — attaching the domain makes the site reachable, not indexed.

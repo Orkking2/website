@@ -18,7 +18,7 @@ This information architecture began as course planning for a formal website prop
 
 ## Project in one sentence
 
-Build a long-lived personal website that combines Nicolas's professional and research portfolio, technical writing, photography, and CV in a clear static site generated with SvelteKit, versioned in GitHub, and deployed to `nebve.com` through Cloudflare Pages.
+Build a long-lived personal website that combines Nicolas's professional and research portfolio, technical writing, photography, and CV in a clear static site generated with SvelteKit, versioned in GitHub, and deployed to `nebve.com` through Cloudflare Workers static assets (see "Hosting platform" below for why this replaced the originally planned Cloudflare Pages).
 
 ## Product goals
 
@@ -41,9 +41,22 @@ The site is not merely an online résumé. It is a connected record of Nicolas's
 - Public domain: `nebve.com`, already registered and managed through Cloudflare.
 - Framework: SvelteKit.
 - Rendering: fully prerendered/static output.
-- Hosting: Cloudflare Pages.
+- Hosting: Cloudflare Workers, configured for static assets only (no Worker script, no dynamic backend). See "Hosting platform" immediately below.
 - Repository and content source of truth: GitHub.
 - Primary navigation: About Me, Research & Projects, Writing, Photography, and CV.
+
+### Hosting platform: Cloudflare Workers static assets, not Pages
+
+This project originally targeted Cloudflare Pages. While connecting deployment (2026-09-05), two things became clear: Cloudflare's dashboard now defaults new "Workers & Pages" project creation to a Git-connected Worker rather than classic Pages, and Cloudflare's own documentation states plainly that Workers, not Pages, is "Cloudflare's primary platform for building applications" going forward.
+
+Cloudflare Workers now serve static assets natively — a Worker configured with an `assets` block and no `main` script entrypoint is, for this project's purposes, architecturally identical to what Pages provided: the exact same prerendered `build` output, served with no server-side code, no cold start, and no CPU billing, because requests never reach a Worker script at all. Nothing about this reintroduces a backend, a Function, or dynamic logic — `wrangler.jsonc` in this repository deliberately has no `main` field. The "do not add a Cloudflare Function/Worker...without approval" rule below is about avoiding dynamic backend logic, not about which Cloudflare product name serves static files; it remains in force for anything with a `main` script.
+
+Practical consequences:
+
+- Configuration lives in a committed `wrangler.jsonc` (`assets.directory: "./build"`, `assets.not_found_handling: "404-page"` so the real `build/404.html` is served rather than an SPA fallback) instead of a Pages project's build-output-directory setting.
+- The Cloudflare dashboard's deploy command for this project is `npx wrangler deploy`, not a Pages-style static publish.
+- Custom-domain attachment uses the Workers custom-domains flow (Settings → Domains & Routes → Add → Custom Domain), not Pages' custom-domain workflow.
+- `_headers` and `_redirects` in `static/` are still honored the same way they were under Pages.
 - Home is reached through Nicolas's name or site mark; it does not need a sixth primary-navigation item.
 - Photography contains a gallery and photo essays.
 - The CV exists as readable HTML plus a downloadable PDF.
@@ -226,7 +239,7 @@ Provide a fast, readable HTML version and an obvious PDF download. Reuse structu
 /cv
 ```
 
-Use clean, stable, lowercase slugs. If a route changes after publication, preserve inbound links with a redirect where Cloudflare Pages supports it. External paper, code, docs.rs, and PDF links must remain real links rather than being disguised as interface buttons without link semantics.
+Use clean, stable, lowercase slugs. If a route changes after publication, preserve inbound links with a redirect via `static/_redirects`, which Cloudflare Workers static assets honors the same way Pages did. External paper, code, docs.rs, and PDF links must remain real links rather than being disguised as interface buttons without link semantics.
 
 ## Technical architecture
 
@@ -242,7 +255,8 @@ Markdown, structured data, images, and Svelte code
                        GitHub
                          │
                          ▼
-           Cloudflare Pages build + preview
+        Cloudflare Workers build + preview
+              (static assets only)
                          │
                          ▼
              SvelteKit prerendered static files
@@ -257,7 +271,7 @@ Markdown, structured data, images, and Svelte code
 - Provide a real top-level `build/404.html`, not an SPA fallback, and verify it with an unknown URL.
 - A visitor request must not require a database query or an application server.
 - The GitHub repository is the content store and source of truth, not a runtime database.
-- Do not add a CMS, database, authentication system, backend API, Cloudflare Function/Worker, or runtime content fetch without a concrete requirement and Nicolas's approval.
+- Do not add a CMS, database, authentication system, backend API, or runtime content fetch without a concrete requirement and Nicolas's approval. This includes a Worker `main` script with dynamic logic — the static-assets-only Worker configured in `wrangler.jsonc` (see "Hosting platform" above) is the one approved exception, since it has no script and serves only the prerendered `build` output.
 - Prefer build-time content loading and static HTML. Hydrate only components that genuinely need client-side behavior.
 - Follow the existing lockfile and repository conventions once the project exists. Keep dependencies few, maintained, and justified.
 
@@ -410,19 +424,19 @@ Accessibility is part of the definition of done, not a later polish pass.
 - Make external links safe and clearly recognizable. If a link opens a new tab, avoid doing so unnecessarily and include appropriate `rel` attributes.
 - Keep dependencies current and audit significant additions. Static generation is a security and maintenance advantage; preserve it unless requirements change.
 
-## GitHub and Cloudflare Pages workflow
+## GitHub and Cloudflare Workers deployment workflow
 
 1. Author or edit Markdown, structured data, images, and Svelte code locally.
 2. Run formatting, type/content checks, tests, and a production build.
 3. Commit to Git and push to GitHub.
-4. Use a pull request and Cloudflare Pages preview for meaningful visual or content changes when the repository workflow supports it.
+4. Use a pull request and Cloudflare's preview deployment for meaningful visual or content changes when the repository workflow supports it.
 5. Review the preview at mobile and desktop sizes.
 6. Merge the approved change to the production branch, expected to be `main` unless the repository says otherwise.
-7. Let Cloudflare Pages rebuild and deploy the static `build` output to `nebve.com`.
+7. Let Cloudflare rebuild and redeploy the Worker's static assets to `nebve.com`.
 
-The expected Pages settings are the repository's production branch (normally `main`), build command `npm run build`, and output directory `build`. Cloudflare's generic SvelteKit preset may suggest `.svelte-kit/cloudflare`, which is the Cloudflare-adapter output. This project deliberately uses `@sveltejs/adapter-static`; configure Pages to publish `build` instead. Attach `nebve.com` through the Pages custom-domain workflow. Choose one canonical production hostname, normally `https://nebve.com`, and redirect or otherwise deliberately configure alternate `www` and production `pages.dev` hostnames.
+The expected Cloudflare project settings are the repository's production branch (normally `main`), build command `npm run build`, and deploy command `npx wrangler deploy`, which reads `wrangler.jsonc`'s `assets.directory` (`./build`) rather than a separate build-output-directory field. Cloudflare's dashboard defaults new "Workers & Pages" project creation to a Worker; that is correct for this project, not a mistake to redirect away from. This project deliberately uses `@sveltejs/adapter-static` to produce that `build` directory rather than `@sveltejs/adapter-cloudflare`'s `.svelte-kit/cloudflare` output. Attach `nebve.com` through the Workers custom-domain workflow (Settings → Domains & Routes → Add → Custom Domain). Choose one canonical production hostname, normally `https://nebve.com`, and redirect or otherwise deliberately configure alternate `www` and production `*.workers.dev` hostnames.
 
-Document the exact Node version, package manager, build command, output directory, environment variables, Cloudflare project configuration, and custom-domain steps in the repository README once they exist. No secret should be required merely to build public content. Do not change production DNS or deploy publicly without Nicolas's authorization.
+Document the exact Node version, package manager, build command, deploy command, Worker/assets configuration, environment variables, and custom-domain steps in the repository README once they exist. No secret should be required merely to build public content. Do not change production DNS or deploy publicly without Nicolas's authorization.
 
 ## Agent responsibilities and limits
 
@@ -445,7 +459,7 @@ Document the exact Node version, package manager, build command, output director
 - gallery and image optimization;
 - accessibility implementation and testing;
 - metadata, `sitemap.xml`, and approved feeds;
-- static adapter and Cloudflare Pages configuration;
+- static adapter and Cloudflare Workers static-assets configuration;
 - automated checks, documentation, and technical maintenance.
 
 ### Agents must ask before
@@ -462,14 +476,14 @@ Agents may make small, reversible implementation decisions consistent with this 
 
 ## Recommended implementation sequence
 
-1. Confirm the repository state, package manager, current SvelteKit guidance, and Cloudflare Pages settings.
+1. Confirm the repository state, package manager, current SvelteKit guidance, and Cloudflare Workers/`wrangler.jsonc` settings.
 2. Establish static prerendering, shared layout, the five-item navigation, footer, and foundational design tokens.
 3. Add validated content collections and draft filtering.
 4. Implement Home, About Me, Research & Projects, UBQ, Writing, Photography, and CV routes. Keep missing content in drafts or leave its route unpublished; a public coming-soon state requires Nicolas's approval.
 5. Implement UBQ-to-writing and Writing-to-photo-essay cross-links without duplication.
 6. Add responsive media handling, accessibility details, metadata, sitemap, robots rules, and the CV download.
 7. Add automated checks and a production build; inspect representative pages visually and with keyboard/accessibility tools.
-8. Configure Cloudflare Pages previews and production deployment, then document the workflow.
+8. Configure Cloudflare Workers previews and production deployment, then document the workflow.
 
 Do not block an early release because Project Archive / Other Projects is omitted, or because article subtypes, RSS, site search, or analytics are unfinished.
 
@@ -487,7 +501,7 @@ Do not block an early release because Project Archive / Other Projects is omitte
 - Keyboard navigation, focus, landmarks, headings, contrast, alternative text, and reduced-motion behavior have been checked.
 - Representative pages have no obvious layout shift, oversized image transfer, or unnecessary hydration.
 - Page titles, descriptions, canonical URLs, social metadata, `sitemap.xml`, and `robots.txt` are correct for `nebve.com`.
-- The documented local build matches Cloudflare Pages' production output.
+- The documented local build matches Cloudflare Workers' production static-assets output.
 - Nicolas has reviewed the visible design, copy, photographs, project claims, CV, and production preview.
 
 ## Open questions to preserve
@@ -510,4 +524,4 @@ Do not silently answer these on Nicolas's behalf:
 
 The accompanying `annotated_bibliography.md` records the sources informing this brief. Its main principles are: design around visitor goals, keep navigation shallow and comprehensible, use semantic and accessible structure, separate stable project hubs from dated writing, allow content to grow through tags and links, and keep the implementation static and maintainable.
 
-Recheck version-sensitive implementation details against the official [SvelteKit static-site documentation](https://svelte.dev/docs/kit/adapter-static), [Cloudflare Pages SvelteKit guide](https://developers.cloudflare.com/pages/framework-guides/deploy-a-svelte-kit-site/), and [Cloudflare Pages custom-domain guide](https://developers.cloudflare.com/pages/configuration/custom-domains/) before configuring production.
+Recheck version-sensitive implementation details against the official [SvelteKit static-site documentation](https://svelte.dev/docs/kit/adapter-static), [Cloudflare Workers static assets documentation](https://developers.cloudflare.com/workers/static-assets/), and [Cloudflare Workers custom-domains guide](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) before configuring production.
