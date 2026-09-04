@@ -2,6 +2,8 @@
 
 Nicolas's personal website for research and projects, technical writing, photography, and a web-readable CV. The repository is the content source of truth; SvelteKit prerenders it to static files for Cloudflare Pages.
 
+The active implementation sequence, approval gates, content dependencies, and decision log are maintained in [`docs/implementation-plan.md`](docs/implementation-plan.md).
+
 ## Current status
 
 This is a local, content-first prototype—not a launch-ready site.
