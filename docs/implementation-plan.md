@@ -24,6 +24,7 @@ This is the running plan for bringing `nebve.com` from the current local prototy
 - The clean prototype baseline is preserved on `main` at commit `0309d68`.
 - The identity implementation is isolated on `feat/identity-prototype`.
 - The homepage identity direction has been approved for continued development.
+- Article, annotation, gallery, viewer, and photo-essay specimens are implemented and awaiting visual review.
 - The site remains non-indexable, has no Git remote, and has not been deployed.
 
 ## Delivery milestones
@@ -60,20 +61,20 @@ Completion evidence: `npm run quality` passes, and commits `bf0caf7` and `0309d6
 
 ### Article and annotations
 
-- [ ] Build a representative technical-article fixture using clearly marked non-public content.
-- [ ] Prototype the wide reading column and one open-by-default annotation rail.
-- [ ] Add a single rail collapse control with a complete no-JavaScript reading path.
-- [ ] Convert annotations to inline disclosures at narrow widths.
-- [ ] Prototype footnote references, canonical notes, return links, and optional previews.
+- [x] Build a representative technical-article fixture using clearly marked non-public content.
+- [x] Prototype the wide reading column and one open-by-default annotation rail.
+- [x] Add a single rail collapse control with a complete no-JavaScript reading path.
+- [x] Convert annotations to inline disclosures at narrow widths.
+- [x] Prototype footnote references, canonical notes, return links, and optional previews.
 - [ ] Verify focus, hover, Escape dismissal, reduced motion, and content-on-hover behavior.
 
 ### Photography and photo essays
 
-- [ ] Build a mixed-aspect gallery fixture without publishing substitute photography.
-- [ ] Prototype linked-image borders, keyboard focus, and the `.txt` essay marker.
-- [ ] Prototype the full-viewport viewer with an ordinary-link fallback.
-- [ ] Prototype the pinned-image and advancing-text essay treatment.
-- [ ] Define narrow, short-viewport, touch, keyboard, and reduced-motion fallbacks.
+- [x] Build a mixed-aspect gallery fixture without publishing substitute photography.
+- [x] Prototype linked-image borders, keyboard focus, and the `.txt` essay marker.
+- [x] Prototype the full-viewport viewer with an ordinary-link fallback.
+- [x] Prototype the pinned-image and advancing-text essay treatment.
+- [x] Define narrow, short-viewport, touch, keyboard, and reduced-motion fallbacks.
 
 ### Phase review gate
 
@@ -182,3 +183,4 @@ These actions require Nicolas's explicit approval when the phase begins.
 ## Change log
 
 - **2026-09-04:** Created the running implementation plan after Phase 0 and the first homepage identity review.
+- **2026-09-04:** Added the first article, annotation, gallery, viewer, and photo-essay specimens for Phase 1 review.
