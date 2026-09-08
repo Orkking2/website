@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-ebc2cdc7af24",
+	"asset": {
+		"master": "../masters/photo-ebc2cdc7af24.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Eyes that pierce the soul",
+	"caption": "His eyes feel empty as he gazes upon you, his blue eyes looking beyond the surface.",
+	"alt": "A little boy with blue eyes gazes at you.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-02T12:16:53",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.35999666666667,
+		"longitude": 4.885938333333334
+	},
+	"gallery": {
+		"included": true
+	}
+}

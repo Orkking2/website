@@ -1,233 +1,122 @@
-# Private photography intake
+# Photography
 
-The photography authoring workflow is local and batch-oriented. It is not a site route,
-CMS, upload API, or backup system. Phone originals, exact source names, content hashes,
-raw capture timestamps, private coordinate suggestions, and metadata-presence warnings stay under
-**.local/photography/**, which is ignored by Git and guarded from **static/** and
-**build/**.
+- **Status:** active
+- **Owner:** Nicolas
+- **Last updated:** 2026-09-08
 
-The importer never edits, moves, or deletes its source folder. Its inbox is a working
-copy, so transfer and back up the phone export before using these commands.
+## The library
 
-## Toolchain decision
+`.local/photography/` is the library. It is Git-ignored, it holds the original files exactly as they came off the phone, and **nothing ever copies or edits them**. Put a photograph there and this site hosts it; take it out and it stops being offered.
 
-The intake toolchain deliberately separates metadata from pixels:
+Placing a file in that folder is the selection. There is no second decision to make, no flag to set, and no promotion step. Organise it into whatever subfolders you like — the whole tree is read.
 
-- Apple ImageIO reads HEIC, JPEG, and PNG dimensions, orientation, capture timestamps,
-  explicit UTC offsets, color-profile names, exact latitude/longitude suggestions, and
-  metadata-presence flags. Coordinates remain in the private manifest. The helper never returns
-  camera serials, face regions, or other raw metadata values.
-- **heic-decode 2.1** uses the maintained libheif WebAssembly decoder for HEIC pixels.
-- **sharp 0.35** handles JPEG and PNG pixels, bounded resizing, JPEG output, sRGB
-  tagging, and output metadata inspection. It is also the intended foundation for
-  later reproducible responsive variants in CI.
+`.local/photography/.data/` is reserved. It caches, keyed by content hash, the derived data and previews for each photograph so a rescan costs one `stat` per unchanged file. Deleting it is safe; the next run rebuilds it, slowly.
 
-Apple ImageIO and the packaged libvips HEVC decoder both produced unusable pixel output
-for the representative files on the development machine, although they could read
-metadata. The spike therefore keeps Apple ImageIO only for metadata and uses the
-libheif WebAssembly decoder for HEIC pixels. Near-uniform output detection prevents the
-same failure from passing silently in the future.
+## The studio
 
-The ImageIO helper is compiled locally with the macOS system Objective-C compiler and
-cached only under **.local/photography/.tools/**. The static site build never needs the
-private originals or the Apple helper. Promoted source masters are ordinary, bounded
-JPEG files outside **static/**.
+```
+npm run photos
+```
 
-The implementation follows Apple’s ImageIO metadata and orientation model and sharp’s
-documented defaults: output metadata is removed unless explicitly retained, auto
-orientation removes the orientation tag, and an inside resize preserves aspect ratio.
+Scans the library, then serves a private, loopback-only workspace on `127.0.0.1`, protected by a per-run token, and prints its address the way the dev server does. Nothing is opened for you: click the address, or keep a tab pointed at it. Because the token is minted per run and embedded in the page, a tab left open across a restart reloads itself once to pick up the current one. Everything you type saves straight into `src/content/photography/.photogrid/records/`, which is ordinary tracked source.
 
-## 1. Transfer and back up a batch
+It has three sections:
 
-Export the intended photographs from the phone into an ordinary folder on the computer.
-Keep that folder in the normal backed-up photo archive. Import is not a replacement for
-the archive.
+- **Unfinished** — everything not yet published: not marked reviewed, or still missing data.
+- **Ready** — reviewed and complete. These are the photographs the site serves, still fully editable.
+- **Essays** — every photo essay with its photographs in order. Import the ones an essay is about, name each one, drag to reorder, and choose the cover. See "Essays own their photographs" below.
 
-Do not place the export under this repository or in **static/**.
+Useful flags: `--port <number>` (default 4179, so a bookmarked tab keeps working), `--open` to launch a browser as well, `--prune` to drop cache entries for photographs that have left the library, `--library <path>` to point at a different library, and `--yes` to skip the bulk-read confirmation.
 
-## 2. Run the read-only toolchain spike
+The one confirmation it asks for is not editorial. A new photograph writes a publication master into the repository, and those are committed permanently, so a first run over more than 25 new files tells you how much history that adds before it starts.
 
-Run this before the first import from a new phone/export configuration:
+## Unfinished, then reviewed
 
-    npm run photos:spike -- /absolute/path/to/export-folder
+There is exactly one stage between putting a file in the library and publishing it, and a photograph is **unfinished** for both halves of it: while you have not marked it **Reviewed**, and while its data is incomplete. Neither is an error. A library is expected to hold work in progress, so an unfinished photograph is simply left out — `npm run build` succeeds and the site is built without it.
 
-For machine-readable aggregate output:
+Marking a photograph reviewed is the whole gate. The one thing that must be there first is **alternative text**, or an explicit mark that the image is decorative: that is what a screen reader has instead of the photograph, so it is not a matter of taste. A title is required too, but it fills itself in as `Untitled` rather than standing in your way. Everything else — caption, place, coordinates, gallery inclusion, essay — is content you write or leave alone.
 
-    npm run photos:spike -- /absolute/path/to/export-folder --json
+The one thing that _is_ reported is a photograph marked reviewed whose data is still incomplete, because that is a claim about it that is not true. `npm run content:check` names it and the build refuses.
 
-The spike hashes inputs, creates temporary orientation-correct review images, checks
-for near-uniform decoder failures, summarizes formats/orientations/profiles/timestamps,
-and reports only aggregate counts for readable coordinates and GPS/device/XMP presence. It never
-prints the coordinates themselves. Temporary outputs are removed when
-the command ends.
+The capture date and time are read from the file and shown for editing. Saving is confirming; there is no separate tick.
 
-### Representative private-batch result
+### Alternative text and caption are different jobs
 
-The 2026-09-04 run exercised 27 unique HEIC inputs totaling 49.4 MiB. Aggregate findings:
+They are easy to confuse, because a caption is often descriptive too.
 
-- all source pixel matrices were 4032 × 3024 and tagged Display P3;
-- 10 used orientation 1 and 17 used orientation 6;
-- capture suggestions spanned 2026-07-02 through 2026-09-02;
-- every file contained an explicit capture-time offset;
-- every original contained GPS, device, and XMP metadata;
-- all 27 originals supplied readable private latitude/longitude suggestions;
-- all 27 generated review images had the intended oriented aspect, unique pixel output,
-  an sRGB profile, and no EXIF, GPS, IPTC, XMP, comments, or device metadata;
-- HEIC, JPEG, and PNG paths all decoded successfully in separate runs.
+- **Alternative text** _replaces_ the photograph for someone who cannot see it. Describe what is in the frame.
+- **The caption** is printed under the photograph _for everyone_, alongside the image rather than instead of it. It carries what a viewer could not work out by looking.
 
-No coordinate or camera value was written to versioned files. Exact visual
-Display-P3-to-sRGB comparison in Safari and Chromium remains a prototype gate before
-any lasting publication setting is approved.
+If the two are identical, a screen reader reads the same sentence twice; the studio says so when it sees that.
 
-## 3. Import a batch
+## Filling in what an older record is missing
 
-Choose a stable private batch name:
+A record written by an earlier pipeline can be missing data the original has carried all along — coordinates most of all, which used to be stripped on the way in. The studio fills these in for itself: it reads the cache first, and the original only if the cache is silent too, and it never overwrites anything already written. A blank field is missing data; a field you cleared on purpose is one you can clear again.
 
-    npm run photos:import -- /absolute/path/to/export-folder --batch summer-2026
+When an original cannot be read the failure is **soft, and reported on that photograph**: the card and its editor say what went wrong, and every other photograph in the library still loads.
 
-Import recursively:
+A photograph taken with location services off carries no GPS at all, so there is nothing to recover. The studio says so on that photograph rather than leaving a blank pair of fields that looks like a broken autofill, and it does not decode the original again on every run to re-learn it.
 
-- computes SHA-256 before copying;
-- keeps one private original and one review record per exact content hash;
-- records repeated files in the same source and duplicates found in other local batches;
-- preserves original names and relative paths only in the private manifest;
-- copies RAW, video, adjustment-sidecar, and unknown files into the private inbox with
-  explicit warnings instead of silently discarding them;
-- identifies a video with the same folder and stem as an image as a possible Live Photo
-  companion;
-- creates 1600-pixel-bounded, orientation-correct sRGB JPEG review images;
-- records capture time, timezone, and coordinates as private suggestions, not approved public facts.
+## The watermark
 
-The resulting private structure is:
+Every image this site serves carries, burned into its pixels:
 
-    .local/photography/summer-2026/
-    ├── manifest.private.json
-    ├── originals/
-    └── thumbnails/
+```
+nebve.com 52°21'29.7"N 4°52'50.8"E 03 Jul 2026 19:52:06
+```
 
-Re-running the same command is safe. Existing content hashes and stable review IDs are
-reused, missing private files are restored, and duplicate originals are not created.
-To re-read metadata or regenerate review images after a toolchain change:
+Black text with a white outline, bottom left. The coordinate segment is omitted entirely when a photograph has none, and clearing both coordinate fields in the studio removes it.
 
-    npm run photos:import -- /absolute/path/to/export-folder --batch summer-2026 --refresh-metadata
+Two things about how it reads. Coordinates are in **degrees, minutes and seconds**, latitude first, because that is how a place is written on a map and said aloud — and the hemisphere letter carries the sign, so there is no minus to misread. The **month is spelled out**, so `03 Jul 2026` cannot be read as the seventh of March the way `03-07-2026` can.
 
-## 4. Review
+Three things about how it is applied:
 
-Start the loopback-only workspace:
+- It is drawn **after** each resize, at a size proportional to that output, so the text is rendered at the size it will be seen at rather than being downsampled along with the photograph. It stays legible at 480 pixels and at 2400.
+- The white outline is what makes it survive lossy compression. Black alone disappears into a dark photograph, and JPEG at quality 86 smears thin dark strokes; the outline gives the encoder a high-contrast edge to preserve. `scripts/photos/variants.test.ts` asserts the mark is present and that the rest of the frame is untouched.
+- The committed master in `src/content/photography/.photogrid/masters/` is **clean**. The mark is applied when variants are built, so correcting a date or a coordinate re-marks every served size without going back to the original file.
 
-    npm run photos:review -- --batch summer-2026
+Because the mark is part of what a served file is, the watermark settings and text are part of the variant cache key: change either and every size rebuilds under a new name.
 
-The server binds only to **127.0.0.1**, uses a per-run private request token, sends a
-same-origin content-security policy, and does not expose source paths. Stop it with
-Ctrl+C.
+> Exact coordinates in the mark are a permanent, public disclosure of where a photograph was taken. A copy someone downloads keeps them. Clear the coordinate fields for anything shot somewhere you would not publish the address of.
 
-The contact sheet is capture-time ordered. Use Left/Right to move and 1/2/3 to choose
-Select, Hold, or Reject. Every field change is saved atomically to the ignored manifest.
-The incomplete count covers undecided records and the requirements attached to a
-selected draft.
+## What reaches the repository
 
-Review fields remain distinct:
+| Location                                      | Contents                                                   | Tracked |
+| --------------------------------------------- | ---------------------------------------------------------- | ------- |
+| `.local/photography/`                         | Originals, untouched                                       | No      |
+| `.local/photography/.data/`                   | Hash-keyed cache and previews                              | No      |
+| `src/content/photography/.photogrid/masters/` | Bounded sRGB JPEG masters, no EXIF, no GPS, no device data | Yes     |
+| `src/content/photography/.photogrid/records/` | The public record for each photograph                      | Yes     |
+| `src/content/writing/**/*.md`                 | Which photographs an essay holds, and their names          | Yes     |
+| `static/images/photography/`                  | Watermarked variants, generated at build                   | No      |
 
-- stable ID;
-- optional title;
-- caption plus an explicit “caption reviewed” decision, so blank can be intentional;
-- draft alternative text, or an explicit decorative decision;
-- required local capture date/time, optional UTC offset, and a separate review decision;
-- optional human-written public location label;
-- private latitude/longitude suggestions and an explicit per-image “include coordinates” choice;
-- gallery inclusion; the public gallery sorts automatically by capture time, newest first;
-- optional canonical photo-essay slug.
+Masters are capped at 3200 pixels at quality 0.92 and stripped of all embedded metadata. `npm run photos:guard` and the `--source-only` check in `npm run build` scan for private paths and original filenames leaking into tracked files or build output.
 
-Linking an existing essay is supported by slug. Scaffolding new canonical Markdown
-essays is deferred until the shared Phase 2 Markdown content directories and schemas
-exist, so this tool does not invent a competing essay format.
+## Publishing
 
-For terminal-only use:
+`git push`. That is the gate. The site rebuilds from what is committed.
 
-    npm run photos:review -- --batch summer-2026 --no-open
+## Essays own their photographs
 
-## 5. Check and promote selected drafts
+Which photographs belong to an essay is kept in **one place: the essay's own `images:` map**, which pairs a name you choose with a photograph's ID. Nothing is written into the photograph's record, so there is no second copy to keep in step, and the gallery's `.txt` reading link is worked out by reading the essays.
 
-Inspect what would be promoted:
+The studio is how that map is edited, because it is the only place a photograph can be recognised by looking at it rather than by its ID:
 
-    npm run photos:promote -- --batch summer-2026 --dry-run
+- **Import** adds a photograph to an essay, naming it after its title.
+- **The name** is what the essay's prose refers to — `<Photo of="tombstone" />`, and `#tombstone` as a link target. Renaming it in the studio also rewrites those references in the essay's body, so a rename cannot quietly break the page.
+- **Order** is the order the essay presents them in; **cover** names one of them.
+- **The photo essay field** in a photograph's own editor moves it between essays, writing only the essay files.
 
-Promote all selected records:
+An essay that names an unfinished photograph is reported by `npm run content:check`, since the page would otherwise render a gap where an image belongs.
 
-    npm run photos:promote -- --batch summer-2026
+## Gallery presentation and links
 
-Or promote one reviewed stable ID:
+Gallery order is the order the photographs were taken, newest first, computed from each capture time and its UTC offset so the comparison is between real instants rather than wall-clock readings. The grid fills the way English reads — left to right, then down — so that order is the order a reader meets. It was a multi-column layout until 2026-09-08, which filled each column top to bottom first and made a correctly ordered gallery read as unordered.
 
-    npm run photos:promote -- --batch summer-2026 --id supplied-stable-id
+The columns are dense — each stacks on its own, so a portrait stands beside a landscape with no gap under the shorter one and neither is cropped. Which column a photograph lands in is decided when the page is built, by giving it to whichever column is shortest so far. That is what keeps the order readable: dealing strictly left, right, left would let one column collect the short photographs and run away from the other, and everything below that point would read out of step. Choosing the shortest holds the two within one photograph's height of each other however many are added, so a mismatch stays local instead of accumulating.
 
-Promotion creates:
+Two consequences worth knowing. The markup is ordered by column rather than by date, so the viewer's Previous and Next follow the sequence each frame records rather than the markup, and a screen reader or a Tab key meets the left column before the right — a coherent reading of two columns, but not the order the photographs were taken. And at one column the wrappers stop being boxes, so every photograph becomes an item of the gallery again and the recorded sequence puts them back in order. As of 2026-09-08, titles are embedded into the top-left of each generated variant using the existing watermark style. Changing a title regenerates both studio previews and served variants. Captions and approved location labels appear below the image, alongside its stable link and any `.txt` essay link. Photo essays live under `src/content/writing/photography/`; the gallery library remains in `src/content/photography/.photogrid/`.
 
-    src/content/photography/
-    ├── masters/supplied-stable-id.jpg
-    └── records/supplied-stable-id.json
+Photographs placed in an essay open that same viewer, and the page shell carries it wherever there are photographs to look at — so a page with neither ships no viewer and no script.
 
-The master is orientation-normalized, sRGB, metadata-inspected, and bounded to a
-provisional 3200-pixel maximum edge without cropping. The public record contains no
-source name, source path, hash, camera value, or private batch label. GPS metadata is never
-embedded in the image. The public record contains latitude and longitude only when the review
-checkbox explicitly enables them for that photograph. It is always created with **status:
-draft**. The current site does not load these draft records, so promotion alone cannot publish a
-photograph.
-
-Selected records need a reviewed capture date and time before draft promotion. Other incomplete
-editorial fields may remain explicit during local draft integration. Publication validation must
-later reject a meaningful image without reviewed alt text or an unreviewed caption.
-
-Approved date, time, location, and coordinates are displayed through an accessible image
-information disclosure in the gallery. It opens by click or keyboard and works on touch devices;
-the exact coordinates are still public data even when the disclosure is closed.
-
-Promotion refuses to replace an existing managed master or record unless the newly
-generated result is identical. After reviewing a correction, opt in to replacement:
-
-    npm run photos:promote -- --batch summer-2026 --id supplied-stable-id --overwrite
-
-The 3200-pixel bound and JPEG quality are implementation candidates, not approved
-lasting publication settings.
-
-## 6. Preview, correction, and recovery
-
-- Reopen the review command at any time; saves are continuous and atomic.
-- Correct metadata in the review workspace, run promotion with **--dry-run**, then use
-  **--overwrite** only after reviewing the change.
-- If import is interrupted, rerun the same import command. Hash verification restores
-  incomplete copies without changing the source.
-- If a private batch is no longer active, preserve a recoverable local archive with:
-
-      mkdir -p .local/photography/_archived
-      mv .local/photography/summer-2026 .local/photography/_archived/
-
-- Restore it by moving the batch directory back, or re-import from the backed-up export
-  folder.
-- Removing a promoted draft requires removing both its managed master and JSON record
-  in one reviewed Git change. Never remove or overwrite the backed-up phone export as
-  part of repository cleanup.
-
-## 7. Privacy guard
-
-Run the guard directly:
-
-    npm run photos:guard
-
-It is also run before and after every production build. It rejects unignored or tracked
-HEIC/HEIF/RAW files, private staging paths, private manifests, private provenance
-markers, and symlinks from public output into the intake area.
-
-The guard complements, rather than replaces, the metadata inspection performed when a
-draft master is generated. Responsive-variant generation and independent variant
-metadata inspection remain Phase 2 work once the shared public photography content
-model is wired into the site.
-
-## References
-
-- [Apple ImageIO](https://developer.apple.com/documentation/imageio)
-- [Apple orientation-aware thumbnail transform](https://developer.apple.com/documentation/imageio/kcgimagesourcecreatethumbnailwithtransform)
-- [sharp output and metadata behavior](https://sharp.pixelplumbing.com/api-output/)
-- [sharp auto orientation](https://sharp.pixelplumbing.com/api-operation/#autoorient)
-- [sharp aspect-preserving resize](https://sharp.pixelplumbing.com/api-resize/)
-- [heic-decode source and usage](https://github.com/catdad-experiments/heic-decode)
+A photograph can be shared as `/photography#photo-ID`. IDs survive title edits, reordering, and regenerated image filenames. Viewer navigation replaces the selected photo in the URL, and reloading restores it. The largest served image is 2400 pixels wide; the master is not used as the browser fallback.

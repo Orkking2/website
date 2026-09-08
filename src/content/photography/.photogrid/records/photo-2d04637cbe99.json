@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-2d04637cbe99",
+	"asset": {
+		"master": "../masters/photo-2d04637cbe99.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Man slumped on the bus",
+	"caption": "It is very late in the day (around 4 in the morning), and I am heading home from the club, Razzmatazz in this case, and I happened to snap a photograph of this man beside me.",
+	"alt": "We are on a bus, looking across the aisle at a man whose neck makes a 90-degree angle with the seat, parallel to the floor. His hands are clasped, his bag is beside him, and he is framed by his seat and a window pane, viewing some closed garage doors.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-11T04:35:17",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 41.38982,
+		"longitude": 2.175025
+	},
+	"gallery": {
+		"included": true
+	}
+}

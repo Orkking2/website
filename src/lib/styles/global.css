@@ -91,7 +91,14 @@ a:focus-visible {
 	transform: translateY(0);
 }
 
+/*
+ * The same header on every page, and it stays put while the page scrolls under it.
+ * The photograph viewer is a dialog above this, so opening an image still covers it.
+ */
 .site-header {
+	position: sticky;
+	top: 0;
+	z-index: 10;
 	border-bottom: 1px solid var(--line);
 	background: var(--background);
 }
@@ -125,6 +132,20 @@ a:focus-visible {
 	font-size: 1.25rem;
 	font-weight: 400;
 	letter-spacing: -0.015em;
+}
+
+.site-header nav {
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scrollbar-width: none;
+}
+
+.site-header nav::-webkit-scrollbar {
+	display: none;
+}
+
+.site-header nav ul {
+	flex-wrap: nowrap;
 }
 
 .site-header nav ul,
@@ -766,16 +787,46 @@ h3 {
 	line-height: 1.7;
 }
 
+/*
+ * Two columns that fill the way English reads: left to right, then down.
+ *
+ * This was a multi-column layout, which fills each column top to bottom before
+ * starting the next — so a gallery ordered newest-first read as though it were
+ * not ordered at all. A grid places items in source order along each row, so the
+ * order photographs were taken is the order they are met. Rows are as tall as
+ * their tallest photograph and each figure sits at the top of its own, which is
+ * what keeps a portrait beside a landscape without cropping either.
+ */
 .gallery-grid {
-	columns: 2;
-	column-gap: 0.15rem;
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
 	margin-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+/*
+ * Each column stacks on its own, so a portrait beside a landscape leaves no gap
+ * under the shorter one. Which column a photograph lands in is decided when the
+ * page is built, always the shortest so far, so neither column runs ahead of the
+ * other and the sequence still reads down the page.
+ */
+.gallery-grid__column {
+	display: flex;
+	flex: 1 1 0;
+	flex-direction: column;
+	gap: 1.5rem;
+	min-width: 0;
 }
 
 .gallery-grid figure {
 	position: relative;
-	margin: 0 0 0.15rem;
-	break-inside: avoid;
+	margin: 0;
+	scroll-margin-top: 6rem;
+}
+
+.gallery-grid figure:target {
+	outline: 1px solid var(--interaction);
+	outline-offset: 0.3rem;
 }
 
 .gallery-grid__frame {
@@ -786,88 +837,31 @@ h3 {
 .gallery-grid img {
 	display: block;
 	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-
-.gallery-grid figure:hover img {
-	transform: scale(1.015);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	.gallery-grid img {
-		transition: transform 0.3s ease;
-	}
+	height: auto;
 }
 
 .gallery-grid figcaption {
-	position: absolute;
-	inset: auto 0 0 0;
-	margin: 0;
-	padding: 1.5rem 0.85rem 0.7rem;
-	background: linear-gradient(to top, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0));
-	color: var(--text);
-	font-size: 0.92rem;
-	line-height: 1.3;
-	pointer-events: none;
-}
-
-.photo-info {
-	position: absolute;
-	top: 0.6rem;
-	right: 0.6rem;
-}
-
-.photo-info__toggle {
-	display: grid;
-	width: 1.75rem;
-	height: 1.75rem;
-	place-items: center;
-	border: 1px solid rgba(242, 242, 238, 0.55);
-	border-radius: 50%;
-	background: rgba(0, 0, 0, 0.55);
-	color: var(--text);
-	font-style: italic;
-	font-weight: 600;
-	cursor: pointer;
-}
-
-.photo-info__toggle:hover,
-.photo-info__toggle:focus-visible {
-	border-color: var(--accent);
-	color: var(--accent);
-}
-
-.photo-info__toggle:focus-visible {
-	outline: 2px solid var(--focus);
-	outline-offset: 3px;
-}
-
-.photo-info__caption {
-	position: absolute;
-	top: calc(100% + 0.4rem);
-	right: 0;
-	z-index: 1;
-	width: max-content;
-	max-width: min(18rem, calc(100vw - 3rem));
-	margin: 0;
-	padding: 0.65rem 0.8rem;
-	border: 1px solid var(--line-strong);
-	background: var(--background);
-	color: var(--text);
-	font-size: 0.86rem;
+	padding: 0.75rem 0 0;
+	color: var(--text-secondary);
+	font-size: 1rem;
 	line-height: 1.5;
-	opacity: 0;
-	visibility: hidden;
-	transition:
-		opacity 0.15s ease,
-		visibility 0.15s ease;
 }
 
-.photo-info:hover .photo-info__caption,
-.photo-info:focus-within .photo-info__caption {
-	opacity: 1;
-	visibility: visible;
+.gallery-grid figcaption p {
+	margin: 0 0 0.5rem;
+}
+
+.gallery-caption__links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem 1.25rem;
+	font-size: 0.9rem;
+}
+
+.gallery-caption__links a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.75rem;
 }
 
 .empty-state {
@@ -929,13 +923,6 @@ h3 {
 	margin: 0;
 }
 
-.essay-image {
-	display: grid;
-	grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 0.55fr);
-	align-items: end;
-	gap: clamp(1.5rem, 5vw, 4rem);
-}
-
 .essay-images img {
 	display: block;
 	width: 100%;
@@ -949,15 +936,6 @@ h3 {
 	color: var(--muted);
 	font-size: 0.9rem;
 	line-height: 1.55;
-}
-
-.essay-image__context {
-	max-width: var(--measure);
-	line-height: 1.7;
-}
-
-.essay-image__context > :last-child {
-	margin-bottom: 0;
 }
 
 .status {
@@ -1073,10 +1051,6 @@ h3 {
 		grid-template-columns: 1fr;
 	}
 
-	.essay-image {
-		grid-template-columns: 1fr;
-	}
-
 	.principle-list,
 	.audience-list {
 		grid-template-columns: 1fr;
@@ -1152,7 +1126,17 @@ h3 {
 	}
 
 	.gallery-grid {
-		columns: 1;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	/*
+	 * One column: the wrappers stop being boxes, so every photograph becomes an item
+	 * of the gallery itself again and `order` puts the whole sequence back into the
+	 * order the photographs were taken.
+	 */
+	.gallery-grid__column {
+		display: contents;
 	}
 
 	.link-pair {
@@ -1193,6 +1177,8 @@ h3 {
 /* Phase 1 identity prototype: homepage index */
 .home-index {
 	padding-top: clamp(2.5rem, 5vw, 4.75rem);
+	/* One scope for the authored sections, which number themselves in document order. */
+	counter-reset: index-section;
 }
 
 .home-index__intro {
@@ -1931,4 +1917,365 @@ h3 {
 	.photo-essay-prototype__surface {
 		min-height: 0;
 	}
+}
+
+/* Content-system extensions inherit the candidate identity tokens above. */
+.prose :where(pre, table, figure) {
+	max-width: 100%;
+}
+.prose pre {
+	overflow: auto;
+	padding: 1rem;
+	border: 1px solid var(--rule-strong);
+	background: var(--surface-subtle);
+	font-size: 0.9rem;
+}
+.prose code,
+.prose pre {
+	font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.prose table {
+	display: block;
+	overflow-x: auto;
+	border-collapse: collapse;
+}
+.prose th,
+.prose td {
+	padding: 0.65rem 0.9rem;
+	border: 1px solid var(--rule-strong);
+	text-align: left;
+}
+.prose img {
+	max-width: 100%;
+	height: auto;
+}
+.prose :target {
+	scroll-margin-top: 8rem;
+	outline: 1px solid var(--focus);
+	outline-offset: 0.25rem;
+}
+.prose .footnotes {
+	margin-top: 3rem;
+	padding-top: 1rem;
+	border-top: 1px solid var(--rule-strong);
+}
+.related-content {
+	margin-block: 3rem;
+}
+.article-reading__toggle {
+	accent-color: var(--interaction);
+}
+.article-reading__label {
+	display: inline-block;
+	padding: 0.5rem;
+}
+.article-flow--annotated {
+	display: grid;
+	grid-template-columns: minmax(0, var(--measure)) minmax(14rem, 19rem);
+	column-gap: clamp(2rem, 6vw, 6rem);
+	max-width: none;
+	align-items: start;
+}
+.article-flow--annotated > * {
+	grid-column: 1;
+	min-width: 0;
+}
+.article-flow--annotated > .annotation-note {
+	grid-column: 2;
+}
+.article-reading__toggle:not(:checked) ~ .article-flow .annotation-note {
+	display: none;
+}
+@media (max-width: 58rem) {
+	.article-flow--annotated {
+		display: block;
+		max-width: var(--measure);
+	}
+	.article-reading__toggle,
+	.article-reading__label {
+		display: none;
+	}
+	.article-reading__toggle:not(:checked) ~ .article-flow .annotation-note {
+		display: block;
+	}
+	.article-flow .annotation-note {
+		margin-block: 1.5rem;
+	}
+	.article-flow .annotation-note summary {
+		display: list-item;
+		min-height: 2.75rem;
+	}
+}
+.gallery-grid__frame {
+	display: block;
+	text-decoration: none;
+}
+.gallery-grid__frame picture {
+	display: block;
+}
+.gallery-grid__frame img {
+	height: auto;
+	object-fit: contain;
+}
+.gallery-grid figure:hover img {
+	transform: none;
+}
+.gallery-grid__frame:hover,
+.gallery-grid__frame:focus-visible {
+	outline: 2px solid var(--interaction);
+	outline-offset: -2px;
+}
+.photo-coordinates {
+	position: relative;
+	background: var(--background);
+	padding: 0.5rem;
+}
+.photo-coordinates summary {
+	min-height: 2.75rem;
+	cursor: pointer;
+}
+.photo-viewer {
+	position: fixed;
+	inset: 0;
+	width: 100vw;
+	max-width: none;
+	height: 100dvh;
+	max-height: none;
+	margin: 0;
+	padding: 1rem;
+	border: 0;
+	background: var(--background);
+	color: var(--text);
+	overscroll-behavior: contain;
+}
+.photo-viewer[open] {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto auto;
+	gap: 0.75rem;
+}
+.photo-viewer::backdrop {
+	background: var(--background);
+}
+.photo-viewer header,
+.photo-viewer nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+.photo-viewer h2 {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 400;
+}
+.photo-viewer button {
+	min-height: 2.75rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--rule-strong);
+	background: var(--background);
+	color: var(--text);
+	cursor: pointer;
+}
+.photo-viewer button:hover,
+.photo-viewer button:focus-visible {
+	color: var(--interaction);
+	border-color: var(--interaction);
+}
+.photo-viewer__image,
+.photo-viewer__image picture {
+	display: flex;
+	min-height: 0;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+}
+.photo-viewer__image img {
+	display: block;
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+.photo-viewer__caption {
+	margin: 0;
+	max-height: 20dvh;
+	overflow: auto;
+}
+.photo-viewer-open {
+	overflow: hidden;
+}
+@media (forced-colors: active) {
+	.gallery-grid__frame:focus-visible {
+		outline-color: Highlight;
+	}
+}
+
+/* The full-width index is the common shell. Prose keeps a broader, centered measure;
+ * authored lists, galleries, figures, and sections can use the whole shell. */
+.page-intro {
+	max-width: none;
+	padding-bottom: clamp(2.5rem, 5vw, 4rem);
+}
+
+.page-intro > :where(h1, p) {
+	width: 100%;
+	max-width: 60rem;
+	margin-inline: auto;
+}
+
+.page-intro h1 {
+	max-width: 60rem;
+	font-size: clamp(2.5rem, 5vw, 4.75rem);
+}
+
+.article-reading {
+	--reading-measure: 60rem;
+}
+
+.article-flow {
+	max-width: none;
+	font-size: 1.1875rem;
+	line-height: 1.65;
+}
+
+.article-flow > :where(p, h2, h3, h4, blockquote, pre, table, ul, ol):not(.working-index) {
+	width: 100%;
+	max-width: var(--reading-measure);
+	margin-inline: auto;
+}
+
+.article-flow > :where(section, aside, figure, div) {
+	font-size: 1.0625rem;
+}
+
+.article-flow--annotated {
+	grid-template-columns: minmax(0, var(--reading-measure)) minmax(14rem, 19rem);
+	column-gap: 2.5rem;
+	justify-content: center;
+}
+
+.article-reading:has(.article-reading__toggle:not(:checked)) .article-flow--annotated {
+	display: block;
+}
+
+.article-reading:has(.article-reading__toggle) {
+	text-align: right;
+}
+
+.article-flow {
+	text-align: left;
+}
+
+.related-content,
+.collection-reading,
+.page-shell > .resource-list {
+	max-width: 60rem;
+	margin-inline: auto;
+}
+
+.collection-reading {
+	margin-block: 4rem 0;
+	padding-block: 1.5rem;
+	border-top: 1px solid var(--rule-strong);
+}
+
+.collection-reading h2,
+.writing-collection h2 {
+	font-size: 1.75rem;
+}
+
+.writing-collection {
+	margin-bottom: 3.5rem;
+}
+
+.writing-collection > p {
+	color: var(--text-secondary);
+	max-width: 60rem;
+}
+
+.working-index a[aria-current='page'] {
+	color: var(--text);
+	text-decoration-style: double;
+}
+
+@media (max-width: 64rem) {
+	.article-flow--annotated {
+		display: block;
+	}
+	.article-reading__toggle,
+	.article-reading__label {
+		display: none;
+	}
+	.article-reading__toggle:not(:checked) ~ .article-flow .annotation-note {
+		display: block;
+	}
+}
+
+.article-flow > h2 {
+	font-size: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.page-intro time {
+	white-space: nowrap;
+}
+
+.article-flow > h2:first-child {
+	margin-top: 0;
+}
+
+/*
+ * A photograph an essay places, and the ones that close it.
+ *
+ * It lines up with the writing rather than breaking out past it: the article
+ * centres its prose on the reading measure, and the photograph takes the same
+ * width so the column reads as one. The frame is a link into the viewer, which
+ * is where the photograph is seen large.
+ */
+.essay-photo {
+	width: 100%;
+	max-width: var(--reading-measure, 60rem);
+	margin-inline: auto;
+	margin-block: clamp(2rem, 6vw, 3.5rem);
+}
+
+.essay-photo__frame {
+	display: block;
+	text-decoration: none;
+	background: var(--surface-subtle);
+	/* Reserved so the affordance does not move the photograph when it appears. */
+	outline: 1px solid transparent;
+	outline-offset: 3px;
+}
+
+.essay-photo__frame:hover,
+.essay-photo__frame:focus-visible {
+	outline-color: var(--interaction);
+}
+
+.essay-photo__frame picture {
+	display: block;
+}
+
+.essay-photo__frame img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.essay-photo figcaption {
+	margin-top: 0.6rem;
+	color: var(--muted);
+	font-size: 0.9rem;
+	line-height: 1.55;
+}
+
+.essay-photo figcaption b {
+	font-weight: 400;
+	color: var(--text);
+}
+
+.essay-photo figcaption b + span::before {
+	content: ' — ';
 }

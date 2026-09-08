@@ -1,5 +1,5 @@
-import { publicRoutePaths, site } from '$lib/data/site';
-import { publishedPhotoEssays, publishedWritingEntries } from '$lib/content/catalog';
+import { site } from '$lib/data/site';
+import { sitemapPaths } from '$lib/content/catalog';
 
 export const prerender = true;
 
@@ -13,12 +13,8 @@ function escapeXml(value: string) {
 }
 
 export function GET() {
-	const contentPaths = [
-		...publishedWritingEntries.map((entry) => `/writing/${entry.slug}`),
-		...publishedPhotoEssays.map((essay) => `/photography/essays/${essay.slug}`)
-	];
 	const entries = site.indexable
-		? [...publicRoutePaths, ...contentPaths]
+		? sitemapPaths
 				.map((path) => `  <url><loc>${escapeXml(new URL(path, site.url).toString())}</loc></url>`)
 				.join('\n')
 		: '';

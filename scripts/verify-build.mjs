@@ -1,8 +1,7 @@
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import catalog from '../src/content/catalog.json' with { type: 'json' };
-import routeDefinitions from '../src/lib/data/routes.json' with { type: 'json' };
+import { readContent } from './content/index.ts';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const buildDirectory = path.join(projectRoot, 'build');
@@ -35,18 +34,15 @@ function countMatches(value, expression) {
 	return [...value.matchAll(expression)].length;
 }
 
-const contentRoutes = [
-	...catalog.writing
-		.filter((entry) => !entry.draft)
-		.map((entry) => ({ path: `/writing/${entry.slug}`, sitemap: true })),
-	...catalog.photoEssays
-		.filter((essay) => !essay.draft)
-		.map((essay) => ({ path: `/photography/essays/${essay.slug}`, sitemap: true }))
-];
-const expectedRoutes = [...routeDefinitions, ...contentRoutes];
+// The content tree is the only source of truth for what should have been built.
+const { pages } = await readContent();
+const expectedRoutes = pages.map((page) => ({
+	path: page.route,
+	sitemap: page.metadata.listed
+}));
 const builtPages = new Map();
 
-for (const requiredAsset of ['404.html', 'robots.txt', 'sitemap.xml', '_headers']) {
+for (const requiredAsset of ['404.html', 'robots.txt', 'sitemap.xml', '_headers', '_redirects']) {
 	await access(path.join(buildDirectory, requiredAsset));
 }
 
@@ -82,14 +78,13 @@ for (const route of expectedRoutes) {
 	if (countMatches(html, /<h1\b/gi) !== 1) {
 		throw new Error(`${route.path}: expected exactly one h1.`);
 	}
-	const expectedRobots =
-		isPrototype || route.path === '/404' ? 'noindex, nofollow' : 'index, follow';
+	const expectedRobots = isPrototype || !route.sitemap ? 'noindex, nofollow' : 'index, follow';
 	if (!new RegExp(`<meta\\b[^>]*name="robots"[^>]*content="${expectedRobots}"`, 'i').test(html)) {
 		throw new Error(`${route.path}: robots metadata does not match the current release state.`);
 	}
-	if (/<script\b/i.test(html)) {
+	if (/_app\/immutable\/entry/i.test(html)) {
 		throw new Error(
-			`${route.path}: the non-interactive prototype should not ship hydration scripts.`
+			`${route.path}: the non-interactive prototype should not ship a SvelteKit hydration bundle.`
 		);
 	}
 	if (!isPrototype && /data-(?:editorial-placeholder|draft-only)(?:[\s=>])/i.test(html)) {
@@ -101,6 +96,16 @@ for (const route of expectedRoutes) {
 
 const knownRoutes = new Set(expectedRoutes.map((route) => route.path));
 
+// Moved pages must point directly to real canonical destinations, without loops or chains.
+const redirects = await readFile(path.join(buildDirectory, '_redirects'), 'utf8');
+const redirected = new Set();
+for (const line of redirects.split('\n').filter((line) => line.trim() && !line.startsWith('#'))) {
+	const [from, to, status] = line.trim().split(/\s+/);
+	if (status !== '301' || knownRoutes.has(from) || redirected.has(from) || !knownRoutes.has(to))
+		throw new Error(`Invalid migration redirect: ${line}`);
+	redirected.add(from);
+}
+
 for (const [routePath, html] of builtPages) {
 	const routeUrl = new URL(routePath, 'https://nebve.com');
 	for (const match of html.matchAll(/<a\b[^>]*href="([^"]+)"/gi)) {
@@ -111,9 +116,14 @@ for (const [routePath, html] of builtPages) {
 		if (target.origin !== routeUrl.origin) continue;
 
 		const linkPath = target.pathname.replace(/\/$/, '') || '/';
-		if (!knownRoutes.has(linkPath)) {
-			throw new Error(`${routePath}: internal link points to an unknown route (${linkPath}).`);
-		}
+		if (knownRoutes.has(linkPath)) continue;
+
+		const assetExists = await access(path.join(buildDirectory, target.pathname))
+			.then(() => true)
+			.catch(() => false);
+		if (assetExists) continue;
+
+		throw new Error(`${routePath}: internal link points to an unknown route (${linkPath}).`);
 	}
 }
 

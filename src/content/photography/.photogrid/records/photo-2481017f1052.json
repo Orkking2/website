@@ -1,0 +1,26 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-2481017f1052",
+	"asset": {
+		"master": "../masters/photo-2481017f1052.jpg",
+		"format": "jpeg",
+		"width": 3200,
+		"height": 2400,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Barcelona clouds",
+	"caption": null,
+	"alt": "We look into the sky, upon fluffy white clouds. The sun is setting, casting dazzling rays into the puffs, contrasting with the shadowed landscape. Even the bottoms of the clouds are in shadow, only their peaks are illuminated.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-10T21:12:50",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"gallery": {
+		"included": true
+	}
+}

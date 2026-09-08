@@ -8,13 +8,13 @@ The active implementation sequence, approval gates, content dependencies, and de
 
 This is a local, content-first prototype—not a launch-ready site.
 
-- The approved information architecture and five-item primary navigation are implemented.
-- Home, About Me, Research & Projects, UBQ, Writing, Photography, Photo Essays, CV, and a real 404 page are prerendered.
+- The approved information architecture and four-item primary navigation are implemented.
+- Home, About Me, Writing (including UBQ, LUBQ, and photo-essay collections), Photography, CV, and a real 404 page are prerendered.
 - Nicolas's formal proposal informs the visitor-facing purpose, audiences, quality criteria, and progressive UBQ reading path; the authority map is recorded in `docs/vision.md`.
 - The site's voice, visual identity, interaction language, photography behavior, and target Markdown authoring workflow are approved and recorded in `docs/voice-and-identity.md`.
 - Pages use explicit `noindex, nofollow` metadata, and `robots.txt` blocks crawling.
 - The proposal supports UBQ's general subject and in-progress status. No expanded name, contribution, architecture, results, performance claims, resource links, personal history, contact details, articles, photographs, CV facts, or downloadable CV have been invented.
-- The warm neutral/green theme, large hero, card treatment, background grid, and `N` favicon are provisional and conflict with the approved identity. They remain only because the identity has not yet been implemented.
+- The approved identity is implemented: absolute black, near-white text, a lime interaction state, Times New Roman throughout, and a lowercase `n` favicon. Exact secondary token values, typographic metrics, link motion, gallery spacing, and the photo-essay transition remain prototype gates awaiting Nicolas's review.
 - The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website); pushes to `main` are meant to drive the Cloudflare Workers production deployment once it's connected (see "Deploying to Cloudflare Workers" below). Cloudflare itself has not finished connecting yet — that step needs an interactive dashboard login and is Nicolas's to complete.
 
 ## Local development
@@ -40,18 +40,21 @@ npm run quality
 
 `npm run build` creates `build/` with static HTML and assets, then verifies all intended routes, essential page metadata, internal page links, release guards, and the top-level `build/404.html`.
 
-## Private photography intake
+## Photography
 
-Phone exports stay outside the repository. The local intake workflow copies them into a Git-ignored inbox, hashes and deduplicates them, reads capture/privacy warnings, creates orientation-correct review images, and supports continuous local review plus explicit draft promotion:
+`.local/photography/` is the library: Git-ignored, holding the original phone files untouched and uncopied. Putting a photograph there is what selects it. One command reads the library and opens a private, loopback-only studio for editing what each photograph says:
 
 ```sh
-npm run photos:spike -- /absolute/path/to/export-folder
-npm run photos:import -- /absolute/path/to/export-folder --batch summer-2026
-npm run photos:review -- --batch summer-2026
-npm run photos:promote -- --batch summer-2026 --dry-run
+npm run photos
 ```
 
-See [`docs/photography-intake.md`](docs/photography-intake.md) before importing or promoting photographs. Import and review never publish media; promotion creates only unreferenced draft source records and sanitized masters outside `static/`.
+Edits save straight into `src/content/photography/.photogrid/`, which is ordinary tracked source. A photograph is served once it is marked **reviewed** and has alternative text — a screen reader has that instead of the image. Until then it is unfinished and simply left out of the build, so the library can hold work in progress without holding up the site. Everything else is content you write or leave alone, and publication is `git push`.
+
+The studio is also where photo essays are assembled: import photographs into an essay, name each one so the prose can refer to it, set the order and the cover. An essay's own frontmatter is the single record of what it holds.
+
+Every served image carries `nebve.com 52°21'29.7"N 4°52'50.8"E 03 Jul 2026 19:52:06` burned into its pixels, drawn after each resize so it stays legible at every size and through lossy compression. Coordinates read in degrees, minutes and seconds, and the month is spelled out so a date cannot be read in the wrong order. Committed masters are clean, bounded, sRGB, and stripped of EXIF, GPS, and device data.
+
+See [`docs/photography-intake.md`](docs/photography-intake.md) for the library layout, the `.data` cache, and what reaches the repository.
 
 ## Architecture
 
@@ -59,12 +62,12 @@ See [`docs/photography-intake.md`](docs/photography-intake.md) before importing 
 - Rendering: static prerendering with SSR kept on during the build and client-side rendering disabled for the current non-interactive prototype
 - Adapter: `@sveltejs/adapter-static` with strict prerender validation
 - Output: `build`, deployed as Cloudflare Workers static assets per `wrangler.jsonc` (`assets.directory`) — no Worker script, no dynamic backend
-- Content: authored data in `src/content/catalog.json`, checked by the typed build-time model in `src/lib/content/catalog.ts`; no database, CMS, API, or runtime content fetch
+- Content: the page tree under `src/content/` — a Markdown file is a page, a directory is a page with children, and `index.md` serves the directory's own path — validated by `scripts/content/` and exposed through the generated model in `src/lib/content/catalog.ts`; no database, CMS, API, or runtime content fetch
 - Editorial direction: `docs/vision.md` records the authority map; `docs/voice-and-identity.md` is the approved voice and identity standard
-- Route manifest: `src/lib/data/routes.json`, shared by navigation, discovery files, and output verification
+- Routes: derived from the content tree, not declared. `src/routes/[...path]` serves every page and exports them all for prerendering; the header, sitemap, and output verification read the same generated model
 - Canonical origin: `https://nebve.com`
 
-Dynamic Writing and Photo Essay routes export their published slugs for prerendering. Their route templates are the only unseen routes permitted when those collections are empty; every real published entry must still generate static output.
+Adding a page means adding a Markdown file. Nothing else has to be edited: it prerenders to static output, and a new top-level page joins the header on its own.
 
 The project follows the official [SvelteKit static-site guidance](https://svelte.dev/docs/kit/adapter-static). `@sveltejs/adapter-cloudflare` (a separate package, listed as an unused devDependency) would output to `.svelte-kit/cloudflare` for SSR-on-Workers deployments; this repository deliberately uses `@sveltejs/adapter-static` instead, so `wrangler.jsonc` points `assets.directory` at `build`.
 
@@ -80,7 +83,7 @@ The most useful next step is an owner-approved content packet:
 6. Structured CV facts and the reviewed PDF filename.
 7. Owner review of the remaining prototype gates: exact colors, typography metrics, link motion, article rail, gallery spacing, and photo-essay transition.
 
-Draft metadata belongs in the typed catalog with `draft: true`. Published project entries must have a summary and status; writing and photo essays require valid dates; related-project references, URLs, image paths, dimensions, capture date/time, optional coordinates, and alternative text are checked during the build. Gallery images are ordered newest first by capture time. Photo-essay images may also carry a distinct `context` paragraph array so narrative text does not have to double as a caption or alternative text.
+Pages are Markdown files in the directory-based tree under `src/content/`; directories serve their `index.md`. Writing contains project collections and photo essays. Missing required content is reported in development and refuses a production build; there is no `draft` flag. See [the authoring guide](docs/authoring.md) for collection lists, dates, related links, and photo placement. Gallery titles are embedded into generated images, captions sit below them, and stable `/photography#photo-ID` links reopen the viewer. Responsive assets and the direct-image fallback are capped at 2400 pixels wide; clean masters remain source assets. See [gallery growth](docs/gallery-growth.md) for the proposed archive and search approach.
 
 ## Launch checklist
 
@@ -88,10 +91,10 @@ Before making the site public:
 
 1. Remove every editorial placeholder and approve the public copy. The build rejects placeholder-marked surfaces when indexing is enabled.
 2. Add responsive photographs and the reviewed CV PDF.
-3. Implement the approved identity and replace the provisional favicon with the lowercase `n` treatment.
+3. Settle the remaining prototype gates: exact secondary colors, typographic metrics, link motion, article rail, gallery spacing, and the photo-essay transition.
 4. Add and review a social-preview image.
 5. Confirm the `LICENSE` attribution (`Orkking2`) is intentional.
-6. Change `site.indexable` in `src/lib/data/site.ts` only after featured content is no longer draft. This automatically enables indexable metadata, `robots.txt`, and populated sitemap entries; the launch guard rejects an indexable build with a draft featured project.
+6. Change `site.indexable` in `src/lib/data/site.ts` only after the featured content is finished and approved. This automatically enables indexable metadata, `robots.txt`, and populated sitemap entries; the launch guard rejects an indexable build that still contains a `<Notice>` placeholder, or one without an approved dated writing entry and reviewed photographs.
 7. Run `npm run quality` and inspect a Cloudflare Workers preview at mobile and desktop sizes.
 
 ## Deploying to Cloudflare Workers

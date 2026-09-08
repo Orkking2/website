@@ -7,6 +7,9 @@ node_modules
 .wrangler
 /.svelte-kit
 /build
+/src/lib/content/.generated/
+# Built from reviewed publication masters; never copy originals here.
+/static/images/photography/
 
 # Private photography intake workspace
 /.local/

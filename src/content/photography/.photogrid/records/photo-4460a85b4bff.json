@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-4460a85b4bff",
+	"asset": {
+		"master": "../masters/photo-4460a85b4bff.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Skinny dutch houses",
+	"caption": "A woman takes a picture of houses on a canal while a finger from a person unseen seems to point at her.",
+	"alt": "A row of skinny Dutch houses on a canal. They are narrow and tall, reaching up to 6 stories. A woman takes a picture of these houses while a finger from a person unseen seems to point at her.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-02T17:28:57",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.37155833333333,
+		"longitude": 4.886963333333333
+	},
+	"gallery": {
+		"included": false
+	}
+}

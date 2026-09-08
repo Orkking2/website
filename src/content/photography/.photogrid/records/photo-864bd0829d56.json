@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-864bd0829d56",
+	"asset": {
+		"master": "../masters/photo-864bd0829d56.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "A small car",
+	"caption": "",
+	"alt": "A very small car next to a door, under an overhang.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-02T17:16:19",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.37243333333333,
+		"longitude": 4.879713333333333
+	},
+	"gallery": {
+		"included": true
+	}
+}

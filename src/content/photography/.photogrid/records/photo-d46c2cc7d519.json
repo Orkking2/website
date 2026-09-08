@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-d46c2cc7d519",
+	"asset": {
+		"master": "../masters/photo-d46c2cc7d519.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": null,
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-07-02T12:35:59",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.360096666666664,
+		"longitude": 4.8845133333333335
+	},
+	"gallery": {
+		"included": true
+	}
+}

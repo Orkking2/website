@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-c5490d1ac579",
+	"asset": {
+		"master": "../masters/photo-c5490d1ac579.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": null,
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-07-02T16:54:44",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.36892,
+		"longitude": 4.88447
+	},
+	"gallery": {
+		"included": true
+	}
+}

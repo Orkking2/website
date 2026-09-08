@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-a0a90180334f",
+	"asset": {
+		"master": "../masters/photo-a0a90180334f.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Eyes that do not see",
+	"caption": "He is not capable of vision, and yet his eyes can be followed off the screen, to some unseen location. His visage so radically opposed in alarm to that which the architect of the building intended from their residents.",
+	"alt": "We look upon an owl with enormous yellow eyes. It's figure is comprised of elementary figures, and its surface studded with something shiny. It stares from atop the narrow edge of a triangular-prism-shaped building.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-08T19:21:06",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 41.399208333333334,
+		"longitude": 2.1695083333333334
+	},
+	"gallery": {
+		"included": true
+	}
+}

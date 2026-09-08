@@ -34,6 +34,15 @@ export default defineConfig(
 		}
 	},
 	{
+		// Components rendered inside authored Markdown link to destinations that only exist as
+		// strings at runtime — an author's path, or one derived from the content catalog — so the
+		// compile-time resolve() helper cannot apply. These links are checked instead by
+		// `npm run content:check` against the route model, and by scripts/verify-build.mjs against
+		// the built output, which is the same treatment an ordinary Markdown link already receives.
+		files: ['src/lib/components/content/**/*.svelte'],
+		rules: { 'svelte/no-navigation-without-resolve': 'off' }
+	},
+	{
 		// Override or add rule settings here, such as:
 		// 'svelte/button-has-type': 'error'
 		rules: {}

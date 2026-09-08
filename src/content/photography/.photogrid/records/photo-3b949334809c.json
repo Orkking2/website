@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-3b949334809c",
+	"asset": {
+		"master": "../masters/photo-3b949334809c.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Worn with time",
+	"caption": "His eyes have become disks, his clothes have become devoid of pattern, his face devoid of features besides two pits and a channel; his nose and mouth respectively.",
+	"alt": "The tombstone of a holy man whose face has been worn down by visitors of the church wherein he lies.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-09T10:30:33",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 41.385891666666666,
+		"longitude": 2.171625
+	},
+	"gallery": {
+		"included": false
+	}
+}

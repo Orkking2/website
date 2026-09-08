@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-005ffbd5952a",
+	"asset": {
+		"master": "../masters/photo-005ffbd5952a.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": null,
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-07-09T10:22:57",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 41.385913333333335,
+		"longitude": 2.1716466666666667
+	},
+	"gallery": {
+		"included": true
+	}
+}

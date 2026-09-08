@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-b35fd29488de",
+	"asset": {
+		"master": "../masters/photo-b35fd29488de.jpg",
+		"format": "jpeg",
+		"width": 3200,
+		"height": 2400,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Wingspan",
+	"caption": "A two-meter wingspan.",
+	"alt": "A man is positioned in front of an outline of a bird, whose wingspan is measured upon the filled outline. The man's fingers reach the number 210 on the right-hand side, and a little more than 190 on the left.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-05T16:48:21",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.36610833333334,
+		"longitude": 4.91858
+	},
+	"gallery": {
+		"included": true
+	}
+}

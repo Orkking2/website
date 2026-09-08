@@ -1,0 +1,450 @@
+:root {
+	color-scheme: dark;
+	--bg: #0a0a0a;
+	--panel: #141414;
+	--line: #2a2a2a;
+	--text: #f2f0ec;
+	--muted: #9a968e;
+	--accent: #c8ff4d;
+	--warn: #ffb84d;
+}
+* {
+	box-sizing: border-box;
+}
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font:
+		15px/1.5 'Times New Roman',
+		Times,
+		serif;
+}
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+.bar {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem 1.5rem;
+	padding: 0.9rem 1.5rem;
+	border-bottom: 1px solid var(--line);
+	background: color-mix(in srgb, var(--bg) 92%, transparent);
+	backdrop-filter: blur(8px);
+}
+.bar h1 {
+	margin: 0;
+	font-size: 1.05rem;
+	font-weight: 400;
+	letter-spacing: 0.02em;
+}
+.bar__actions {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-left: auto;
+}
+.status {
+	color: var(--muted);
+	font-size: 0.85rem;
+	min-width: 8ch;
+}
+
+.tabs {
+	display: flex;
+	gap: 0.25rem;
+}
+.tabs button {
+	border: 1px solid transparent;
+	border-radius: 999px;
+	padding: 0.3rem 0.9rem;
+	background: none;
+	cursor: pointer;
+}
+.tabs button:hover {
+	border-color: var(--line);
+}
+.tabs button[aria-current='true'] {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+.count {
+	color: var(--muted);
+	font-size: 0.8rem;
+}
+.tabs button[aria-current='true'] .count {
+	color: inherit;
+}
+
+button[data-action='rescan'],
+.editor button,
+.essay button {
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	padding: 0.3rem 0.8rem;
+	background: var(--panel);
+	cursor: pointer;
+}
+button:hover:not(:disabled) {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+main {
+	padding: 1.5rem;
+}
+.lede {
+	max-width: 60ch;
+	color: var(--muted);
+}
+.empty {
+	color: var(--muted);
+	font-style: italic;
+}
+code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.9em;
+}
+
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+	gap: 1rem;
+	margin-top: 1.25rem;
+}
+.card {
+	display: flex;
+	flex-direction: column;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--panel);
+	overflow: hidden;
+	cursor: pointer;
+	text-align: left;
+	padding: 0;
+}
+.card:hover,
+.card:focus-visible {
+	border-color: var(--accent);
+}
+.card img {
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	object-fit: cover;
+	background: #000;
+}
+.card__meta {
+	padding: 0.6rem 0.7rem;
+}
+.card__title {
+	display: block;
+}
+.card__note {
+	display: block;
+	color: var(--muted);
+	font-size: 0.82rem;
+}
+.card__note--warn {
+	color: var(--warn);
+}
+
+dialog[data-editor] {
+	width: min(1100px, 94vw);
+	max-height: 92vh;
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--panel);
+	color: var(--text);
+}
+dialog::backdrop {
+	background: rgb(0 0 0 / 0.7);
+}
+.editor header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.9rem 1.2rem;
+	border-bottom: 1px solid var(--line);
+}
+.editor header h2 {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 400;
+}
+.editor__body {
+	display: grid;
+	grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+}
+.editor figure {
+	margin: 0;
+	padding: 1.2rem;
+	border-right: 1px solid var(--line);
+}
+.editor figure img {
+	display: block;
+	width: 100%;
+	height: auto;
+	background: #000;
+}
+.editor figcaption {
+	margin-top: 0.7rem;
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+.editor figcaption span {
+	display: block;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	color: var(--text);
+	word-break: break-all;
+}
+.fields {
+	padding: 1.2rem;
+	overflow-y: auto;
+	max-height: calc(92vh - 4rem);
+}
+.field {
+	margin-bottom: 1rem;
+}
+.field > label {
+	display: block;
+	margin-bottom: 0.25rem;
+	color: var(--muted);
+	font-size: 0.85rem;
+}
+.field input[type='text'],
+.field textarea,
+.field select {
+	width: 100%;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	padding: 0.4rem 0.55rem;
+	background: #0d0d0d;
+}
+.field textarea {
+	min-height: 4.5rem;
+	resize: vertical;
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+	outline: 2px solid var(--accent);
+	outline-offset: 1px;
+}
+.field--inline {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.field--inline label {
+	margin: 0;
+	color: var(--text);
+	font-size: 1rem;
+}
+.field .hint {
+	display: block;
+	margin-top: 0.25rem;
+	color: var(--muted);
+	font-size: 0.8rem;
+}
+.field .hint--warn {
+	color: var(--warn);
+}
+.pair {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+}
+
+.essay {
+	margin-bottom: 2rem;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: var(--panel);
+}
+.essay > h2 {
+	margin: 0;
+	padding: 0.8rem 1rem;
+	border-bottom: 1px solid var(--line);
+	font-size: 1rem;
+	font-weight: 400;
+}
+.essay ol {
+	margin: 0;
+	padding: 0.75rem;
+	list-style: none;
+	display: grid;
+	gap: 0.5rem;
+}
+.essay li {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.4rem;
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	background: #101010;
+}
+.essay li[draggable='true'] {
+	cursor: grab;
+}
+.essay li.dragging {
+	opacity: 0.4;
+}
+.essay li.over {
+	border-color: var(--accent);
+}
+.essay li img {
+	width: 72px;
+	height: 54px;
+	object-fit: cover;
+	background: #000;
+}
+.essay li .name {
+	flex: 1;
+	min-width: 0;
+}
+.essay li .name small {
+	display: block;
+	color: var(--muted);
+}
+.essay .cover {
+	color: var(--accent);
+	font-size: 0.8rem;
+}
+.essay .controls {
+	display: flex;
+	gap: 0.25rem;
+}
+.essay p {
+	padding: 0 1rem 1rem;
+	color: var(--muted);
+}
+
+/* The one thing between the library and the site: reviewed, and complete. */
+.field--review {
+	border: 1px solid var(--line);
+	padding: 0.6rem 0.75rem;
+	background: rgba(255, 255, 255, 0.03);
+}
+
+.card__tag {
+	display: inline-block;
+	margin-top: 0.15rem;
+	font-size: 0.75rem;
+	color: var(--accent);
+}
+
+/* A photograph whose original could not be re-read says so on itself, and nowhere else. */
+.problem {
+	display: block;
+	margin-top: 0.35rem;
+	color: #ffb4a2;
+}
+
+.essay__head {
+	display: flex;
+	align-items: baseline;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	flex-wrap: wrap;
+}
+.essay__head h2 {
+	margin: 0;
+	flex: 0 0 auto;
+}
+.essay__head code {
+	color: var(--muted);
+	font-size: 0.8rem;
+	flex: 1;
+	min-width: 0;
+}
+.essay__head .import {
+	flex: 0 0 auto;
+}
+
+.essay li .thumb {
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+	line-height: 0;
+}
+.essay li .thumb span {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 72px;
+	height: 54px;
+	background: #000;
+	color: var(--muted);
+	line-height: 1;
+}
+
+/* The name the essay's prose uses for this photograph, edited where it is seen. */
+.essay .alias {
+	width: 100%;
+	max-width: 18rem;
+	font-family: inherit;
+}
+
+dialog[data-picker] {
+	width: min(1100px, 94vw);
+	max-height: 92vh;
+	padding: 0;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: var(--panel);
+	color: var(--text);
+}
+.picker {
+	display: flex;
+	flex-direction: column;
+	max-height: 92vh;
+}
+.picker header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.9rem 1.2rem;
+	border-bottom: 1px solid var(--line);
+}
+.picker header h2 {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: 400;
+}
+.picker .lede {
+	margin: 0;
+	padding: 0.9rem 1.2rem 0;
+}
+.picker .grid {
+	/*
+	 * The list is what scrolls, so it has to be the flex item allowed to shrink:
+	 * without min-height it cannot, and the grid compresses its rows instead —
+	 * which crops every photograph to an unrecognisable slice. align-content keeps
+	 * each row at its own height rather than stretching to fill what is left.
+	 */
+	min-height: 0;
+	align-content: start;
+	align-items: start;
+	overflow-y: auto;
+	margin-top: 0;
+	padding: 1.25rem 1.2rem;
+}

@@ -31,7 +31,7 @@ export const visitorPaths = [
 		audience: 'Here to understand the research',
 		question: 'What is UBQ, and how does it work?',
 		primaryLabel: 'Begin with UBQ',
-		primaryHref: '/projects/ubq' as const,
+		primaryHref: '/writing/ubq' as const,
 		secondaryLabel: 'Browse Writing',
 		secondaryHref: '/writing' as const
 	},

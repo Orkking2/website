@@ -87,6 +87,44 @@ export async function ensureAppleImageTool() {
 	return TOOL_BINARY;
 }
 
+/**
+ * Read what a source file says about itself, without decoding its pixels.
+ *
+ * The helper reports metadata alongside a render, so this asks for the smallest
+ * render it can and keeps only the metadata. It exists to fill in fields a record
+ * was created without — coordinates recorded before they were kept, a capture time
+ * an earlier pipeline dropped — from the original that is still in the library.
+ */
+export async function readImageMetadata(sources) {
+	if (sources.length === 0) return [];
+	const binary = await ensureAppleImageTool();
+	await ensurePrivateDirectory(PROBE_DIRECTORY);
+	const requests = sources.map((source, index) => ({
+		key: `probe-${index}`,
+		source,
+		output: path.join(PROBE_DIRECTORY, `meta-${randomBytes(6).toString('hex')}.jpg`),
+		maxPixelSize: 16,
+		quality: 0.5
+	}));
+	let stdout;
+	try {
+		({ stdout } = await runProcess(binary, [], { input: JSON.stringify(requests) }));
+	} finally {
+		await Promise.all(requests.map((request) => rm(request.output, { force: true })));
+	}
+	let results;
+	try {
+		results = JSON.parse(stdout);
+	} catch (error) {
+		throw new Error('The Apple image helper returned invalid JSON: ' + error.message, {
+			cause: error
+		});
+	}
+	if (!Array.isArray(results) || results.length !== sources.length)
+		throw new Error('The Apple image helper returned an unexpected number of results.');
+	return results;
+}
+
 export async function processImages(requests) {
 	if (requests.length === 0) return [];
 	for (const request of requests) await mkdir(path.dirname(request.output), { recursive: true });

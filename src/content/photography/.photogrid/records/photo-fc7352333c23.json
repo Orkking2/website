@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-fc7352333c23",
+	"asset": {
+		"master": "../masters/photo-fc7352333c23.jpg",
+		"format": "jpeg",
+		"width": 3200,
+		"height": 2400,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": null,
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-07-03T20:38:59",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.358158333333336,
+		"longitude": 4.881595
+	},
+	"gallery": {
+		"included": true
+	}
+}

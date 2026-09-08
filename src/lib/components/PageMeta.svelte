@@ -6,9 +6,20 @@
 		description: string;
 		path: string;
 		noIndex?: boolean;
+		type?: 'website' | 'article';
+		published?: string | null;
+		updated?: string;
 	}
 
-	let { title, description, path, noIndex = false }: Props = $props();
+	let {
+		title,
+		description,
+		path,
+		noIndex = false,
+		type = 'website',
+		published,
+		updated
+	}: Props = $props();
 	let canonical = $derived(new URL(path, site.url).toString());
 	let fullTitle = $derived(title === site.name ? site.title : `${title} — ${site.name}`);
 </script>
@@ -21,7 +32,15 @@
 		name="robots"
 		content={site.indexable && !noIndex ? 'index, follow' : 'noindex, nofollow'}
 	/>
-	<meta property="og:type" content="website" />
+	<meta property="og:type" content={type} />
+	{#if type === 'article' && published}<meta
+			property="article:published_time"
+			content={published}
+		/>{/if}
+	{#if type === 'article' && updated}<meta
+			property="article:modified_time"
+			content={updated}
+		/>{/if}
 	<meta property="og:site_name" content={site.name} />
 	<meta property="og:title" content={fullTitle} />
 	<meta property="og:description" content={description} />

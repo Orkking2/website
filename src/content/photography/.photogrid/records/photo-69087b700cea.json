@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-69087b700cea",
+	"asset": {
+		"master": "../masters/photo-69087b700cea.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": null,
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-07-02T12:10:47",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.359555,
+		"longitude": 4.885653333333334
+	},
+	"gallery": {
+		"included": true
+	}
+}

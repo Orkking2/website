@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-dacd5434e94d",
+	"asset": {
+		"master": "../masters/photo-dacd5434e94d.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Sexy Jesus",
+	"caption": "Is it just me, or is Jesus flirting with me?",
+	"alt": "Jesus is posed as though hung on the cross, but no cross is present. He is limp and wracked with pain, mouth open.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-02T11:43:10",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.360461666666666,
+		"longitude": 4.885095
+	},
+	"gallery": {
+		"included": true
+	}
+}

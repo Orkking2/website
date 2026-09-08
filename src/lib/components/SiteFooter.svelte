@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
-	import { navigation, site } from '$lib/data/site';
+	import { navigation } from '$lib/content/catalog';
+	import { site } from '$lib/data/site';
 </script>
 
 <footer class="site-footer">
@@ -11,7 +12,7 @@
 		<nav aria-label="Footer navigation">
 			<ul>
 				{#each navigation as item (item.path)}
-					<li><a href={resolve(item.href)}>{item.label}</a></li>
+					<li><a href={resolve('/[...path]', { path: item.path.slice(1) })}>{item.label}</a></li>
 				{/each}
 			</ul>
 		</nav>

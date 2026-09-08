@@ -9,21 +9,22 @@
 	},
 	"scripts": {
 		"dev": "vite dev",
-		"build": "node scripts/photos/private-media-guard.mjs --source-only && vite build && node scripts/verify-build.mjs && node scripts/photos/private-media-guard.mjs --output build",
+		"build": "node scripts/photos/private-media-guard.mjs --source-only && node scripts/content/cli.ts check && vite build && node scripts/verify-build.mjs && node scripts/photos/private-media-guard.mjs --output build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
-		"photos:spike": "node scripts/photos/spike.mjs",
-		"photos:import": "node scripts/photos/import.mjs",
-		"photos:review": "node scripts/photos/review.mjs",
-		"photos:promote": "node scripts/photos/promote.mjs",
+		"photos": "node scripts/photos/studio.mjs",
 		"photos:guard": "node scripts/photos/private-media-guard.mjs --output build",
 		"test:photos": "node --test scripts/photos/*.test.mjs",
-		"quality": "npm run check && npm run lint && npm run test:photos && npm run build",
-		"deploy": "wrangler deploy"
+		"quality": "npm run content:check && npm run check && npm run lint && npm run test:photos && npm run test:content && npm run build",
+		"deploy": "wrangler deploy",
+		"content:check": "node scripts/content/cli.ts check",
+		"content:new": "node scripts/content/cli.ts new",
+		"content:revision": "node scripts/content/cli.ts revision",
+		"test:content": "node --test scripts/content/*.test.ts scripts/photos/variants.test.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
@@ -37,6 +38,8 @@
 		"eslint-plugin-svelte": "^3.19.0",
 		"globals": "^17.6.0",
 		"heic-decode": "^2.1.0",
+		"mdsvex": "^0.12.8",
+		"parse5": "^8.0.1",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",
 		"sharp": "^0.35.4",
@@ -45,6 +48,8 @@
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.60.1",
 		"vite": "^8.0.16",
-		"wrangler": "^4.129.0"
+		"wrangler": "^4.129.0",
+		"yaml": "^2.9.0",
+		"zod": "^4.5.4"
 	}
 }

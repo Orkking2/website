@@ -88,7 +88,7 @@ These examples illustrate form, not publishable claims.
 - **Navigation and metadata:** short, literal, and quietly typographic. No playful renaming of familiar destinations.
 - **Homepage:** orient rapidly, then expose current or featured work. It should read like an index, not a pitch deck.
 - **Technical writing:** direct explanation, visible reasoning, appropriate sources, and room for detail.
-- **Research and project pages:** stable orientation first; role, mechanism, results, limitations, and routes to verification as material becomes available.
+- **Writing collections:** a brief orientation and a list of focused articles. UBQ, LUBQ, and photo essays belong within Writing; a project does not require a separate long overview.
 - **About Me:** personal but factual. It may use “I” and provide context without making the entire site a self-portrait.
 - **CV:** explicit and evidence-forward. This is the surface allowed to advocate most directly for Nicolas.
 - **Photography and photo essays:** use the same clear voice. Context may be personal or observational, but no automatic poetic or enigmatic register should be imposed on the images.
@@ -183,10 +183,11 @@ The photography index is a filterless grid of all selected public images. It pre
 
 - Every photograph is clickable and can open in a full-viewport viewer.
 - A gallery tile lifts and gains a link-like border on hover or focus.
-- Each tile is a tightly fitted crop of the photograph with its title overlaid directly on the image. A small `i` control reveals the caption on hover or keyboard focus; it is deliberately not a click-to-toggle control. A photograph with an essay carries a `.txt` marker in its top-left corner. Neither supplement to shape and text may rely on color alone.
-- Every selected photograph keeps a reviewed capture date and time. The gallery orders images by capture time, newest first, but the exact timestamp is data, not a displayed UI element — it stays in the photo record rather than appearing behind the `i` disclosure. Photo essays retain an explicitly authored sequence.
+- Each tile preserves the photograph’s full aspect ratio. Its title is embedded at the top-left of generated images using the watermark’s outlined Times New Roman treatment. Captions and approved location labels sit below the image; the `i` disclosure is retired. A photograph with an essay has a `.txt` reading link below it.
+- Opening a photograph updates the URL using its stable photo ID. Reloading or sharing that link restores the same image; browser Back closes a viewer opened from the gallery. Without JavaScript, the link locates the photograph and an ordinary image link remains available.
+- Every selected photograph keeps a reviewed capture date and time. The gallery orders images by capture time, newest first, but the exact timestamp is data, not a displayed UI element — it stays in the photo record rather than appearing as caption metadata. Photo essays retain an explicitly authored sequence.
 - Nicolas controls selection, titles, captions, crop decisions, optional location labels, and whether exact coordinates are public for each image.
-- An approved location label may accompany the caption behind the `i` disclosure when Nicolas adds one; exact coordinates remain data he can choose to publish later rather than a default UI element. Closed information remains public data, not private data.
+- An approved location label may accompany the caption below the image when Nicolas adds one; exact coordinates remain data he can choose to publish later rather than a default UI element. Closed information remains public data, not private data.
 
 ### Photo-essay reading behavior
 
@@ -197,6 +198,12 @@ The photography index is a filterless grid of all selected public images. It pre
 - This behavior adapts the spatial principle demonstrated by the supplied Sorapure reference screenshots; it must not copy that site's identity, code, typography, or exact composition.
 - The ordinary gallery needs no special replacement header. Its full-screen viewer retains normal, minimal navigation and a clear close/back action.
 
+## Writing structure and default layout
+
+Approved by Nicolas on 2026-09-08: primary navigation is About Me, Writing, Photography, and CV. Writing includes project articles and photo essays. Directory pages provide subject introductions and reading lists; focused articles remain independently readable. The existing `related` links can connect subjects, while a broader relationship model is deferred.
+
+The broad index shell is now the default for ordinary pages; authors omit `layout`. Prose is centered and wider than the earlier left-aligned article column. Sections and galleries can use the entire shell, and annotations remain an independent option. Exact measures and spacing are still prototype values for review.
+
 ## Authoring system target
 
 This section specifies the intended workflow; it does not claim that the current prototype implements it.
@@ -205,15 +212,17 @@ Markdown-compatible files are the source of truth, built locally and prerendered
 
 ```text
 src/content/
-├── pages/
-│   ├── about.svx
-│   └── cv.svx
-├── projects/
-│   └── ubq.svx
+├── index.md
+├── about.md
+├── cv.md
 ├── writing/
-│   └── article-slug.svx
-└── photo-essays/
-    └── essay-slug.svx
+│   ├── index.md
+│   ├── ubq/                 # index.md and focused articles
+│   ├── lubq/                # index.md and focused articles
+│   └── photography/         # index.md and photo essays
+└── photography/
+    ├── index.md             # gallery, plus links to photo essays
+    └── .photogrid/          # image masters and records
 ```
 
 Ordinary content remains ordinary Markdown. A piece that needs custom behavior imports and uses a standard Svelte component:
@@ -234,23 +243,23 @@ Content metadata is frontmatter validated at build time. A writing entry should 
 
 ```yaml
 title: 'Supplied title'
-slug: 'supplied-slug'
 summary: 'Supplied summary.'
 published: YYYY-MM-DD
 updated: YYYY-MM-DD # optional; substantive revisions only
 tags: []
-relatedProjects: []
+related: [] # canonical page paths
 featured: false
-draft: true
 ```
 
 The target ergonomic workflow should eventually provide:
 
 1. a scaffold command that creates the correct file and required frontmatter;
 2. a fast content-validation command with errors that name the file and field;
-3. a local preview that includes drafts without exposing them in production;
+3. a local preview that renders unfinished work while reporting what it is missing;
 4. a publication step that preserves `published`; and
 5. a revision prompt that offers—but never blindly overwrites—`updated`.
+
+All five are implemented, as `content:new`, `content:check`, `npm run dev`, `git push`, and `content:revision`. Item 3 was originally written as a draft-only preview; the implemented form has no draft stage at all — an incomplete page renders locally with its missing fields reported, and refuses to build. See [authoring.md](authoring.md).
 
 The visual token system should have an author-only central default with a typed per-article override shape reserved for future use. The initial content model always uses the default, so extensibility does not become immediate interface complexity.
 

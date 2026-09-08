@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-162facfacb26",
+	"asset": {
+		"master": "../masters/photo-162facfacb26.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": null,
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-07-05T16:17:05",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.367275,
+		"longitude": 4.913236666666666
+	},
+	"gallery": {
+		"included": true
+	}
+}

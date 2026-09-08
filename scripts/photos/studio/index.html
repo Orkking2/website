@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="referrer" content="no-referrer" />
+		<title>Photo studio — nebve.com</title>
+		<link rel="stylesheet" href="/studio.css" />
+	</head>
+	<body data-token="__STUDIO_TOKEN__">
+		<header class="bar">
+			<h1>Photo studio</h1>
+			<nav class="tabs" aria-label="Sections">
+				<button type="button" data-tab="unfinished" aria-current="true">
+					Unfinished <span class="count" data-count="unfinished">0</span>
+				</button>
+				<button type="button" data-tab="ready">
+					Ready <span class="count" data-count="ready">0</span>
+				</button>
+				<button type="button" data-tab="essays">
+					Essays <span class="count" data-count="essays">0</span>
+				</button>
+			</nav>
+			<div class="bar__actions">
+				<span class="status" role="status" aria-live="polite"></span>
+				<button type="button" data-action="rescan">Rescan library</button>
+			</div>
+		</header>
+
+		<main>
+			<section data-panel="unfinished">
+				<p class="lede">
+					Everything in <code>.local/photography/</code> starts here. A photograph is unfinished
+					until you mark it reviewed and it has alternative text, and an unfinished photograph is
+					simply not published — the site is built without it.
+				</p>
+				<div class="grid" data-grid="unfinished"></div>
+				<p class="empty" data-empty="unfinished">Nothing outstanding.</p>
+			</section>
+
+			<section data-panel="ready" hidden>
+				<p class="lede">
+					Reviewed and complete. These are the photographs the site serves, and they are still yours
+					to change.
+				</p>
+				<div class="grid" data-grid="ready"></div>
+				<p class="empty" data-empty="ready">Nothing reviewed yet.</p>
+			</section>
+
+			<section data-panel="essays" hidden>
+				<p class="lede">
+					An essay's own list is the only record of which photographs belong to it. Import the ones
+					you want, give each a name you will recognise when you write, and drag to set the order.
+					The first is the cover unless you choose another.
+				</p>
+				<div data-essays></div>
+				<p class="empty" data-empty="essays">No photo essays yet.</p>
+			</section>
+		</main>
+
+		<dialog data-picker>
+			<form method="dialog" class="picker">
+				<header>
+					<h2 data-picker-title>Import photographs</h2>
+					<button type="submit" value="close" aria-label="Close">Close</button>
+				</header>
+				<p class="lede" data-picker-note></p>
+				<div class="grid" data-picker-grid></div>
+			</form>
+		</dialog>
+
+		<dialog data-editor>
+			<form method="dialog" class="editor">
+				<header>
+					<h2 data-editor-title>Photograph</h2>
+					<button type="submit" value="close" aria-label="Close">Close</button>
+				</header>
+				<div class="editor__body">
+					<figure>
+						<img alt="" data-editor-preview />
+						<figcaption>
+							<span data-editor-mark></span>
+							<small data-editor-source></small>
+							<small class="problem" data-editor-problem hidden></small>
+						</figcaption>
+					</figure>
+					<div class="fields" data-fields></div>
+				</div>
+			</form>
+		</dialog>
+
+		<script src="/studio-client.js" type="module"></script>
+	</body>
+</html>

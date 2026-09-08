@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-c289419a598e",
+	"asset": {
+		"master": "../masters/photo-c289419a598e.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Air",
+	"caption": null,
+	"alt": null,
+	"decorative": false,
+	"reviewed": false,
+	"captured": {
+		"local": "2026-09-04T17:58:00",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 41.389736666666664,
+		"longitude": 2.1163361666666667
+	},
+	"gallery": {
+		"included": true
+	}
+}

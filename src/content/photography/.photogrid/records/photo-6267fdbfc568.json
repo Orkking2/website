@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-6267fdbfc568",
+	"asset": {
+		"master": "../masters/photo-6267fdbfc568.jpg",
+		"format": "jpeg",
+		"width": 3200,
+		"height": 2400,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "The Cottage",
+	"caption": "The painting, \"The Cottage\", in a museum, pointed at by a finger.",
+	"alt": "",
+	"decorative": true,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-03T19:52:06",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.35841666666666,
+		"longitude": 4.880933333333333
+	},
+	"gallery": {
+		"included": true
+	}
+}

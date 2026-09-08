@@ -1,28 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
-import os from 'node:os';
-import path from 'node:path';
 import test from 'node:test';
-import {
-	classifyFile,
-	collectInputFiles,
-	copyFileVerified,
-	defaultReview,
-	hashFile,
-	mergeReviewDefaults,
-	normalizeReviewPatch,
-	parseExifCapture,
-	reviewIssues,
-	validateBatchName,
-	validateStableId
-} from './lib/core.mjs';
+import { classifyFile, parseExifCapture, validateStableId } from './lib/core.mjs';
+import { backfillRecord } from './library.mjs';
 
-test('batch and stable ID validation rejects path traversal and unstable labels', () => {
-	assert.equal(validateBatchName('summer-2026'), 'summer-2026');
-	assert.equal(validateStableId('photo-123abc'), 'photo-123abc');
-	assert.throws(() => validateBatchName('../summer'));
-	assert.throws(() => validateBatchName('Summer'));
-	assert.throws(() => validateStableId('photo_123'));
+test('stable IDs reject path traversal and unstable labels', () => {
+	assert.equal(validateStableId('photo-2d18ef380301'), 'photo-2d18ef380301');
+	for (const bad of ['../escape', 'Photo-1', 'trailing-', '', 'a'.repeat(65)])
+		assert.throws(() => validateStableId(bad), /Stable photo IDs/);
 });
 
 test('file classification covers supported images, RAW, and Live Photo video formats', () => {
@@ -60,95 +44,47 @@ test('capture suggestions preserve local time and explicit timezone without gues
 	assert.equal(parseExifCapture({}).timezoneStatus, 'missing-capture-time');
 });
 
-test('review validation keeps editorial fields distinct', () => {
-	const review = defaultReview(
-		'abcdef1234567890',
-		{
-			localValue: '2026-09-02T22:58:32',
-			offset: '+02:00'
-		},
-		{ latitude: 41.40338, longitude: 2.17403 }
-	);
-	const item = { kind: 'image', review };
-	assert.deepEqual(reviewIssues(item), ['Choose select, hold, or reject.']);
-	assert.equal(review.coordinateLatitude, 41.40338);
-	assert.equal(review.coordinateLongitude, 2.17403);
-	assert.equal(review.includeCoordinates, false);
+const record = () => ({
+	id: 'photo-abc123456789',
+	captured: { local: '2026-07-03T19:52:06', offset: '+02:00', precision: 'second' }
+});
 
-	const selected = normalizeReviewPatch(review, { status: 'selected' });
-	assert.ok(reviewIssues({ kind: 'image', review: selected }).length >= 3);
-	const complete = normalizeReviewPatch(selected, {
-		captionReviewed: true,
-		altText: 'A supplied description.',
-		captureReviewed: true,
-		galleryIncluded: true,
-		includeCoordinates: true
+test('a record that already has what it needs is left alone, without reading the original', async () => {
+	const full = { ...record(), coordinates: { latitude: 1, longitude: 2 } };
+	// No paths are passed, so any attempt to reach the library or the original would throw.
+	const result = await backfillRecord(full, {});
+	assert.deepEqual(result.filled, []);
+	assert.deepEqual(result.absent, []);
+	assert.deepEqual(result.record.coordinates, { latitude: 1, longitude: 2 });
+});
+
+test('coordinates the cache still holds are filled in from it', async () => {
+	const result = await backfillRecord(record(), {
+		coordinates: { latitude: 41.4, longitude: 2.2 }
 	});
-	assert.deepEqual(reviewIssues({ kind: 'image', review: complete }), []);
-	assert.equal(complete.caption, '');
-	assert.equal(complete.altText, 'A supplied description.');
-	assert.throws(() => normalizeReviewPatch(complete, { coordinateLatitude: 91 }));
+	assert.deepEqual(result.filled, ['coordinates']);
+	assert.deepEqual(result.absent, []);
+	assert.deepEqual(result.record.coordinates, { latitude: 41.4, longitude: 2.2 });
 });
 
-test('review migration backfills coordinate suggestions and removes manual gallery order', () => {
-	const merged = mergeReviewDefaults(
-		{ status: 'hold', galleryOrder: 4 },
-		'abcdef1234567890',
-		{ localValue: '2026-09-02T22:58:32', offset: '+02:00' },
-		{ latitude: -33.8568, longitude: 151.2153 }
-	);
-	assert.equal(merged.status, 'hold');
-	assert.equal(merged.capturedAt, '2026-09-02T22:58:32');
-	assert.equal(merged.coordinateLatitude, -33.8568);
-	assert.equal(merged.coordinateLongitude, 151.2153);
-	assert.equal('galleryOrder' in merged, false);
+test('an original already re-read once and found to have no GPS is reported, not read again', async () => {
+	// refreshedAt is what stops a photograph taken with location off from being decoded
+	// on every run: there is nothing to recover now or later.
+	const result = await backfillRecord(record(), { coordinates: null, refreshedAt: 'once' });
+	assert.deepEqual(result.filled, []);
+	assert.deepEqual(result.absent, ['coordinates']);
+	assert.equal(result.record.coordinates, undefined);
 });
 
-test('selected photographs require a valid reviewed capture date and time', () => {
-	const selected = normalizeReviewPatch(
-		defaultReview('abcdef1234567890', { localValue: null, offset: null }),
-		{ status: 'selected', captionReviewed: true, altText: 'A supplied description.' }
-	);
-	assert.ok(
-		reviewIssues({ kind: 'image', review: selected }).includes(
-			'Add the required capture date and time.'
-		)
-	);
-	assert.throws(() => normalizeReviewPatch(selected, { capturedAt: '2026-02-31T12:00:00' }));
-});
-
-test('hash-based copy is idempotent and leaves the source unchanged', async () => {
-	const directory = await mkdtemp(path.join(os.tmpdir(), 'nebve-photo-core-test-'));
-	try {
-		const source = path.join(directory, 'source.jpg');
-		const destination = path.join(directory, 'private', 'copy.jpg');
-		await writeFile(source, 'test-image-content');
-		const sourceHash = await hashFile(source);
-		assert.equal(await copyFileVerified(source, destination, sourceHash), true);
-		assert.equal(await copyFileVerified(source, destination, sourceHash), false);
-		assert.equal(await hashFile(source), sourceHash);
-		assert.equal(await hashFile(destination), sourceHash);
-	} finally {
-		await rm(directory, { recursive: true, force: true });
-	}
-});
-
-test('recursive collection does not follow symbolic links', async (context) => {
-	if (process.platform === 'win32') {
-		context.skip('Symbolic-link permissions vary on Windows.');
-		return;
-	}
-	const directory = await mkdtemp(path.join(os.tmpdir(), 'nebve-photo-scan-test-'));
-	try {
-		const nested = path.join(directory, 'nested');
-		await mkdir(nested);
-		await symlink('/private', path.join(directory, 'outside'));
-		await writeFile(path.join(nested, 'one.JPG'), 'one');
-		const result = await collectInputFiles(directory);
-		assert.equal(result.files.length, 1);
-		assert.equal(result.files[0].relativePath, path.join('nested', 'one.JPG'));
-		assert.equal(result.warnings[0].code, 'symlink-skipped');
-	} finally {
-		await rm(directory, { recursive: true, force: true });
-	}
+test('a missing capture offset is recovered and reported separately from coordinates', async () => {
+	const undated = record();
+	undated.captured.offset = null;
+	const result = await backfillRecord(undated, {
+		coordinates: null,
+		capture: { offset: '+01:00' },
+		refreshedAt: 'once'
+	});
+	assert.deepEqual(result.filled, ['UTC offset']);
+	assert.deepEqual(result.absent, ['coordinates']);
+	assert.equal(result.record.captured.offset, '+01:00');
 });

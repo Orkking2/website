@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-b959d79aea9d",
+	"asset": {
+		"master": "../masters/photo-b959d79aea9d.jpg",
+		"format": "jpeg",
+		"width": 2400,
+		"height": 3200,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Sunflowers",
+	"caption": "A famous painting with excellent contemplation.",
+	"alt": "A person gestures at a painting of sunflowers.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-03T20:12:51",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.358428333333336,
+		"longitude": 4.880421666666667
+	},
+	"gallery": {
+		"included": true
+	}
+}

@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "photo-fa16597092e6",
+	"asset": {
+		"master": "../masters/photo-fa16597092e6.jpg",
+		"format": "jpeg",
+		"width": 3200,
+		"height": 2400,
+		"colorSpace": "sRGB",
+		"orientation": 1
+	},
+	"title": "Selt-Portrait, 1886,7",
+	"caption": "Famous paintings with excellent contemplation.",
+	"alt": "A person gestures at the famous paintings.",
+	"decorative": false,
+	"reviewed": true,
+	"captured": {
+		"local": "2026-07-03T19:37:20",
+		"offset": "+02:00",
+		"precision": "second"
+	},
+	"location": null,
+	"coordinates": {
+		"latitude": 52.35873333333333,
+		"longitude": 4.8812999999999995
+	},
+	"gallery": {
+		"included": true
+	}
+}

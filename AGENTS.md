@@ -43,7 +43,7 @@ The site is not merely an online résumé. It is a connected record of Nicolas's
 - Rendering: fully prerendered/static output.
 - Hosting: Cloudflare Workers, configured for static assets only (no Worker script, no dynamic backend). See "Hosting platform" immediately below.
 - Repository and content source of truth: GitHub.
-- Primary navigation: About Me, Research & Projects, Writing, Photography, and CV.
+- Primary navigation: About Me, Writing, Photography, and CV (unified on 2026-09-08).
 
 ### Hosting platform: Cloudflare Workers static assets, not Pages
 
@@ -61,8 +61,8 @@ Practical consequences:
 - Photography contains a gallery and photo essays.
 - The CV exists as readable HTML plus a downloadable PDF.
 - UBQ is the initial featured research project and links to its overview, paper/preprint, code or repository, docs.rs documentation, and related writing.
-- Articles related to UBQ live canonically in Writing and are surfaced automatically or explicitly from the UBQ page.
-- Photo essays live canonically in Photography and are linked from Writing; do not create duplicate copies.
+- UBQ articles live in `src/content/writing/ubq/`; its `index.md` gives a brief introduction and lists the focused articles. LUBQ follows the same pattern in `writing/lubq/`. A project does not need a separate monolithic overview.
+- Photo essays live canonically in `src/content/writing/photography/` and are also listed from the Photography gallery; do not create duplicate copies.
 - The authoritative voice and identity standard is `docs/voice-and-identity.md`, approved by Nicolas on 2026-09-04.
 - The site identity is a plain lowercase `nebve.com` in Times New Roman at the top left, with a lowercase `n` favicon. Nicolas's full identity is concentrated on About Me and CV.
 - Every non-code word uses the system Times New Roman stack; code uses monospace. The visual foundation is absolute black, near-white text, and a lime interaction state. Exact supporting token values require prototype review.
@@ -85,12 +85,12 @@ Escalate a tentative choice to Nicolas before making it a visible brand or edito
 
 Use Torrey Podmajersky's content-first idea that an interface is a conversation. Every important page should anticipate what a visitor is asking and give a direct answer or next step.
 
-| Visitor                        | Likely question                                                      | Intended path                                                               |
-| ------------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Employer or collaborator       | Who is Nicolas, what can he do, and where is the evidence?           | Home → About Me or Research & Projects → CV or Contact                      |
-| Researcher or technical reader | What is UBQ, what did Nicolas contribute, and where are the details? | Home → Research & Projects → UBQ → Paper, Code, docs.rs, or Related Writing |
-| Reader                         | What is Nicolas researching or learning?                             | Home or Writing → Article → Related Project or Related Articles             |
-| General or creative visitor    | What does Nicolas make and care about beyond technical work?         | Home → Photography → Gallery or Photo Essay                                 |
+| Visitor                        | Likely question                                                      | Intended path                                                   |
+| ------------------------------ | -------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Employer or collaborator       | Who is Nicolas, what can he do, and where is the evidence?           | Home → About Me or Writing → CV or Contact                      |
+| Researcher or technical reader | What is UBQ, what did Nicolas contribute, and where are the details? | Home → Writing → UBQ → Articles, Paper, Code, or docs.rs        |
+| Reader                         | What is Nicolas researching or learning?                             | Home or Writing → Article → Related Project or Related Articles |
+| General or creative visitor    | What does Nicolas make and care about beyond technical work?         | Home → Photography → Gallery or Photo Essay                     |
 
 Keep important destinations within roughly three clicks of Home. Use familiar link labels that describe the destination; avoid clever labels that make visitors guess.
 
@@ -98,42 +98,24 @@ Keep important destinations within roughly three clicks of Home. Use familiar li
 
 ```text
 Home
-│
 ├── About Me
 │   ├── Biography / Background
-│   ├── Experience
+│   ├── Experience → CV
 │   └── Contact + External Links
-│
-├── Research & Projects
-│   ├── UBQ
-│   │   ├── Project Overview
-│   │   ├── Paper / Preprint
-│   │   ├── Code / Repository
-│   │   ├── docs.rs Documentation
-│   │   └── Related Writing
-│   │
-│   └── Project Archive / Other Projects [provisional label; may be absent at launch]
-│       └── Individual Project Pages
-│
 ├── Writing
-│   ├── Research / Tech Blog
-│   │   └── Individual Article Pages
-│   └── Photo Essays [links to canonical Photography pages]
-│
+│   ├── UBQ → Interface, Head Packing, Producer Reservations, Memory Reuse, Allocation
+│   │   └── Paper / Preprint, Code / Repository, docs.rs Documentation
+│   ├── LUBQ → Per-producer Ordering
+│   ├── Photo Essays → Individual Essay Pages
+│   └── Other collections or standalone articles as authored
 ├── Photography
-│   ├── Gallery
-│   └── Photo Essays
-│       └── Individual Photo Essay Pages
-│
+│   ├── Gallery → Shareable photograph viewer
+│   └── Photo Essays → Canonical Writing pages
 └── CV
-    ├── Web-Readable CV / Résumé
+    ├── Web-readable CV / Résumé
     └── Downloadable PDF
 
-Site-wide
-├── Nicolas's name or mark → Home
-├── Contact link(s)
-├── GitHub and approved external profiles
-└── Footer navigation and copyright
+Site mark → Home; footer → primary sections and approved external links
 ```
 
 ### Required cross-links
@@ -141,20 +123,16 @@ Site-wide
 The sitemap is a graph, not only a directory tree.
 
 ```text
-UBQ project page ←→ Writing posts tagged or related to UBQ
-
-Photography → Photo Essays ← Writing
-                 │
-                 └── one canonical URL per essay
-
-About experience preview → full CV
-Project summaries → project detail → external paper/code/docs
+Writing → Project collection → Focused article → Collection reading list
+                                ↔ Explicit related articles
+Photography → Photo essays ← Writing
+About experience → CV → Relevant writing
 ```
 
-- A project page is stable, explanatory, and link-rich.
-- A writing post is dated, narrower, and can evolve as the research develops.
-- Tags aid discovery but should not force a visible submenu before enough content exists.
-- Cross-links must be generated from validated metadata or an explicit relation, not fragile hard-coded duplication in several components.
+- Directory membership supplies a collection and its reading list. `<Entries from="/writing" grouped />` lists each child directory’s articles under its heading.
+- An article has one canonical file. Existing validated `related` paths and explicit `<Entry from="…" />` links can connect collections without duplicating prose. A richer multiple-membership system is deferred.
+- A collection index is a brief orientation and a list, with external resources when relevant. Articles can be dated or evolving accounts; no long overview is mandatory.
+- Cross-links come from validated metadata or explicit catalog references, not repeated titles and summaries.
 
 ## Page and content requirements
 
@@ -174,11 +152,11 @@ Do not make a full-screen photograph the site's only identity. Do not add a gian
 
 The current working structure is Biography / Background, a concise Experience summary, and Contact + External Links. Confirm it as the content develops. The Experience material should preview rather than duplicate the complete CV. Never invent biographical facts, employers, dates, achievements, contact details, or profile URLs.
 
-### Research & Projects
+### Project writing collections
 
 Project summaries should answer: What is it? Why does it matter? What was Nicolas's role or contribution? Where can a visitor go deeper?
 
-The initial UBQ hub should support:
+The UBQ collection and its focused articles together should support:
 
 - a plain-language project overview before low-level detail;
 - a paper or preprint link;
@@ -191,9 +169,9 @@ Do not infer what “UBQ” expands to, claim performance results, or describe N
 
 ### Writing
 
-Launch around a Research / Tech Blog with individual article pages. Current candidate topics are:
+Writing holds project collections, photo essays, and standalone articles. Current and planned technical topics include:
 
-- “How UBQ Reserves Producer Slots Without Locks”;
+- “Reserving producer slots in UBQ”;
 - “Benchmarking an Unbounded MPMC Queue on Arm”;
 - “Memory Reclamation”;
 - “Contention and Block-Based Queues”;
@@ -212,8 +190,8 @@ Keep this section focused: a selected gallery plus photo essays. A photo essay m
   separately include exact latitude and longitude when Nicolas explicitly enables them for that
   image; present approved coordinates behind a keyboard-, focus-, click-, and touch-accessible
   information disclosure rather than hover alone. This stricter rule is specific to exact
-  coordinates; the ordinary per-photo caption disclosure (the small `i` control on a gallery tile)
-  is deliberately simpler — hover or keyboard focus, not a click-to-toggle control.
+  coordinates. Ordinary captions and approved location labels appear below each photograph;
+  the earlier `i` disclosure is retired as of 2026-09-08.
 - A selected photograph must retain a reviewed capture date and time. Order the main gallery by
   capture date and time, newest first; photo-essay sequencing remains editorial. The exact
   timestamp is not displayed in the gallery UI — it stays in the photo record.
@@ -223,21 +201,27 @@ Keep this section focused: a selected gallery plus photo essays. A photo essay m
 
 Provide a fast, readable HTML version and an obvious PDF download. Reuse structured experience data where sensible so About and CV facts do not drift, while treating the PDF as a separately reviewed artifact. The PDF must not be the only accessible version.
 
-## Recommended route model
+## Route model
+
+Routes are not written by hand. The tree under `src/content/` is the site: a Markdown
+file is a page, a directory is a page with children, and `index.md` is what a directory
+serves at its own path — the same relationship `index.html` has to a directory of a
+site. One route, `src/routes/[...path]`, prerenders all of them.
 
 ```text
-/
-/about
-/projects
-/projects/ubq
-/projects/[slug]
-/writing
-/writing/[slug]
-/photography
-/photography/essays
-/photography/essays/[slug]
-/cv
+src/content/index.md                     →  /
+src/content/about.md                     →  /about
+src/content/writing/index.md             →  /writing
+src/content/writing/ubq/index.md         →  /writing/ubq
+src/content/writing/ubq/head-packing.md  →  /writing/ubq/head-packing
+src/content/writing/lubq/index.md        →  /writing/lubq
+src/content/photography/index.md         →  /photography
+src/content/writing/photography/worn-with-time.md → /writing/photography/worn-with-time
+src/content/cv.md                        →  /cv
 ```
+
+A name beginning with `.` or `_` is not part of the tree, which is how the photograph
+library lives at `src/content/photography/.photogrid/` without becoming a page.
 
 Use clean, stable, lowercase slugs. If a route changes after publication, preserve inbound links with a redirect via `static/_redirects`, which Cloudflare Workers static assets honors the same way Pages did. External paper, code, docs.rs, and PDF links must remain real links rather than being disguised as interface buttons without link semantics.
 
@@ -267,7 +251,7 @@ Markdown, structured data, images, and Svelte code
 
 - Use `@sveltejs/adapter-static` and prerender the site to a static output directory, normally `build`.
 - Export `prerender = true` from the root layout and keep server-side rendering enabled during the build; do not turn the site into a client-only SPA.
-- Ensure every published dynamic `[slug]` route is discoverable during prerendering through generated `entries`, reachable listing links, or another verified mechanism. Non-draft content must not disappear from `build`.
+- Ensure every dynamic `[slug]` route is discoverable during prerendering through generated `entries`, reachable listing links, or another verified mechanism. Authored content must not disappear from `build`.
 - Provide a real top-level `build/404.html`, not an SPA fallback, and verify it with an unknown URL.
 - A visitor request must not require a database query or an application server.
 - The GitHub repository is the content store and source of truth, not a runtime database.
@@ -281,11 +265,13 @@ Adapt this structure to current SvelteKit conventions rather than reproducing it
 
 ```text
 src/
-├── content/
-│   ├── writing/
-│   ├── projects/
-│   ├── photo-essays/
-│   └── pages/
+├── content/                 # the page tree; a file is a page, index.md serves its directory
+│   ├── index.md
+│   ├── about.md
+│   ├── cv.md
+│   ├── writing/             # project collections and photo essays
+│   └── photography/
+│       └── .photogrid/      # masters and records; hidden from the page tree
 ├── lib/
 │   ├── components/
 │   ├── content/
@@ -309,26 +295,26 @@ Separate authored content from presentation logic so a redesign does not require
 
 Validate content at build time. Required fields should fail the build with a useful message rather than silently rendering a broken page. Do not invent missing values to satisfy a schema.
 
-### Writing entry
+Every page uses **one schema**, defined in `scripts/content/schema.ts`, with every facet optional. There is no per-type schema and no `slug` or `collection` field: position in `src/content/` is the declaration, so a file's path is its route. `docs/authoring.md` is the authoritative reference for authors; the notes below record the intent behind the shape.
+
+Only `title` and `summary` are required. Beyond those, **a key that is absent does not apply to this page, while a key that is present but empty is unfinished work** and is reported as such. That distinction carries the typing that four separate schemas used to: a page with `published:` is dated, a page with `images:` is a photo essay, a page with `links:` has resources, a page with `status:` is a project.
+
+### A writing entry
 
 ```yaml
 title: 'Head Packing in UBQ'
-slug: 'head-packing-in-ubq'
 summary: 'A concise, supplied description.'
 published: YYYY-MM-DD
-updated: YYYY-MM-DD # optional
+updated: YYYY-MM-DD # optional; substantive revisions only
 tags: [supplied-tag]
-relatedProjects: [ubq]
+related: ['/writing/ubq/head-packing'] # optional links across collections, by path
 featured: false
-draft: true
-cover: null # optional
 ```
 
-### Project entry
+### A project
 
 ```yaml
 title: 'UBQ'
-slug: 'ubq'
 summary: 'A concise, supplied description.'
 status: 'supplied-status'
 featured: true
@@ -340,32 +326,36 @@ links:
   demo: null
 ```
 
-Project body content may include the problem, context, Nicolas's contribution, approach, results, and next steps, but only when those facts are supplied. Derive related writing from `relatedProjects`, a validated tag convention, or a deliberate explicit list.
+A project is an ordinary directory page: `writing/ubq/index.md` introduces the subject and lists its articles with `<Entries from="/writing/ubq" />`. Project body content may include the problem, context, Nicolas's contribution, approach, results, and next steps, but only when those facts are supplied. Derive collection reading lists from directories; use validated `related` paths for additional links.
 
-### Photo essay and gallery item
+### A photo essay
+
+A page that names photographs is a photo essay, wherever it sits in the tree. Each photograph gets a name local to that page, so the essay refers to its own images rather than duplicating photo objects:
 
 ```yaml
 title: 'Supplied Photo Essay Title'
-slug: 'supplied-photo-essay-slug'
 summary: 'A concise introduction.'
 published: YYYY-MM-DD
+images:
+  tombstone: photo-3b949334809c
+cover: tombstone # names one of this page's own photographs
 location: null # optional and owner-approved
-cover: '/images/photography/supplied-image.jpg'
-featured: false
-draft: true
 inProgress: false # optional; true shows an "In progress" marker wherever the essay is listed
 ```
 
-Each image record should be able to store `src`, an optional `title` (overlaid on the gallery tile),
-`alt`, `caption` (revealed behind the `i` disclosure), `width`, `height`, a required reviewed capture
-date and time, an optional timezone offset, an optional owner-approved location label, and optional
-exact coordinates approved per image. Camera metadata is optional and should not be assumed. Gallery
-order is derived from capture date and time rather than a manual index; the exact capture timestamp
-stays in the record and is not displayed in the gallery UI.
+`<Photo of="tombstone" />` places one where the argument needs it; any photograph left unplaced closes the page in the order it was named.
+
+### The photograph record
+
+The gallery library lives in `src/content/photography/.photogrid/`, hidden from the page tree by its leading dot, and is edited by `npm run photos` rather than by hand. Each record stores the managed asset and its intrinsic dimensions, an optional `title` (burned into the generated image), `alt`, `decorative`, `caption` (displayed below the image), a required capture date and time, an optional timezone offset, an optional owner-approved location label, optional exact coordinates, gallery inclusion, and `reviewed`. Camera metadata is optional and should not be assumed. Gallery order is derived from capture date and time rather than a manual index.
+
+A record does **not** say which essay a photograph belongs to. That link is held once, in the essay's own `images:` map, and the other direction is derived by inverting it.
+
+There is one stage between the library and the site. A photograph is **unfinished** while `reviewed` is false or its data is incomplete, and an unfinished photograph is left out of the build rather than failing it — a library is expected to hold work in progress. Alternative text, or an explicit `decorative` mark, is the one required editorial field, because it is what a screen reader has instead of the photograph; a missing `title` fills itself in as `Untitled`. Marking a photograph reviewed while its data is incomplete _is_ reported, because that claim is untrue.
 
 ### Shared data
 
-Keep approved identity, external-profile, contact, navigation, and CV data in deliberate shared sources. Validate unique slugs, dates, internal references, image paths, and required alternative text. Exclude drafts from production while allowing them in local or preview builds when practical.
+Keep approved identity, external-profile, contact, navigation, and CV data in deliberate shared sources. Validate unique slugs, dates, internal references, image paths, and required alternative text. There is no declared draft state: an entry is servable when it is complete, `npm run dev` reports what is still missing and renders anyway, and `npm run build` refuses. Publication is `git push`.
 
 ## Design and writing principles
 
@@ -376,7 +366,7 @@ Keep approved identity, external-profile, contact, navigation, and CV data in de
 - Start with visitor needs and place content where it is canonical; link to it elsewhere instead of duplicating it.
 - Write purposefully, concisely, conversationally, and clearly. Preserve Nicolas's voice rather than replacing it with generic portfolio copy.
 - Write incomplete-section copy in first person, as Nicolas describing his own unfinished site, not as an agent's checklist addressed to Nicolas. Use a plain "Coming soon" label and bulleted list of what will land there, matching the UBQ reading-path pattern, instead of "not supplied," "still needed," or similar process language.
-- Use readable measures and deliberate density. Every non-code word uses the approved Times New Roman system stack. Keep the primary navigation to the five approved sections.
+- Use readable measures and deliberate density. Every non-code word uses the approved Times New Roman system stack. Keep the primary navigation to the four approved sections.
 - Design mobile-first and verify layouts at narrow, medium, and wide widths.
 - Motion must be restrained, optional, and compatible with `prefers-reduced-motion`.
 - Never copy the distinctive visual identity or code of an inspiration site. Extract principles, give attribution where licensing requires it, and create an original site.
@@ -419,7 +409,7 @@ Accessibility is part of the definition of done, not a later polish pass.
 ## Privacy, security, and content integrity
 
 - Publish only contact details and external profiles Nicolas has approved.
-- Do not expose secrets, private drafts, unapproved CV data, unpublished papers, high-resolution originals, or sensitive image metadata.
+- Do not expose secrets, unapproved CV data, unpublished papers, high-resolution originals, or sensitive image metadata.
 - Treat all prose, project claims, dates, benchmarks, captions, and alt text as editorial content requiring factual support.
 - Make external links safe and clearly recognizable. If a link opens a new tab, avoid doing so unnecessarily and include appropriate `rel` attributes.
 - Keep dependencies current and audit significant additions. Static generation is a security and maintenance advantage; preserve it unless requirements change.
@@ -439,6 +429,37 @@ The expected Cloudflare project settings are the repository's production branch 
 Document the exact Node version, package manager, build command, deploy command, Worker/assets configuration, environment variables, and custom-domain steps in the repository README once they exist. No secret should be required merely to build public content. Do not change production DNS or deploy publicly without Nicolas's authorization.
 
 ## Agent responsibilities and limits
+
+### Draft collaboration preferences
+
+Nicolas explicitly approved this working preference on 2026-09-06. Carry it into future sessions working in this repository:
+
+- When helping with authored drafts, leave concise, targeted writing prompts in inline HTML comments beside the passage they concern: `<!-- Editorial note: ... Response: ... -->`.
+- Ask for a specific piece of writing or evidence, such as two sentences explaining a contribution, one concrete example, or the workload and result supporting a benchmark claim. State the useful scope or length. Prefer these local prompts to repeatedly interrupting the conversation for information that does not block independent work.
+- Treat Nicolas's replies inside those comments as supplied source material. Incorporate answered facts into the draft, preserve unresolved information, and replace answered prompts with the next useful question. Do not keep asking for facts already supplied.
+- When a reply points to a repository or asks the agent to check the implementation, inspect the source and answer what it establishes before leaving another prompt. Use writing prompts for missing authorial context or decisions, not facts recoverable from available code. Distinguish an unresolved historical experiment from what the current implementation shows.
+- If `.local/editorial/context.md` exists, read it before revising drafts. It holds private continuity notes and source material under the Git-ignored local workspace. Respect its disclosure limits; do not copy private context into versionable files, even inside HTML comments, or into generated public assets. Confirm that the local material remains ignored and untracked.
+- Preserve Nicolas's voice and revisions. Keep prompts selective, prioritize the next few useful contributions, and distinguish author-facing editorial comments from the site's reader-facing annotation rail and coming-soon copy.
+- These prompts support drafting; they do not authorize publication, invented facts, manuscript titles, or broader performance claims. Leave unresolved questions in the file rather than answering them, and remove resolved editorial comments from content being prepared for release.
+- For UBQ technical revisions, inspect the latest pushed commit on the source repository's default branch at the start of the pass. Use that code as the current source of truth, then cite the exact inspected commit for reproducibility. Recheck affected prose and links together; neither an earlier website explanation nor unpushed local changes override the latest pushed implementation unless Nicolas explicitly selects a historical comparison.
+
+### Structure and gallery revision, 2026-09-08
+
+Nicolas explicitly approved merging project writing and photo essays into Writing. Keep `/writing` singular to preserve its existing URL. `layout: index` and `layout: article` are retired: ordinary pages share the broad default shell, with centered wider prose and full-width authored sections. `annotations: true` independently enables annotations. The exact measure and spacing remain reviewable prototype values.
+
+Photograph titles are embedded at the top-left of generated variants in the existing outlined watermark treatment, leaving source masters untouched. Captions appear below images, alongside a stable `/photography#photo-ID` link and any `.txt` essay link. Clicking opens the viewer and updates the URL; reload and sharing restore the image, while Back returns to the gallery. Keep a useful anchor and direct image link without JavaScript. Served images, including the direct fallback, are capped at 2400 pixels wide.
+
+Gallery archive navigation and metadata search remain proposals in `docs/gallery-growth.md`, not approved new primary navigation or a search-service dependency.
+
+### Voice flags
+
+Nicolas explicitly approved this working preference on 2026-09-07, after finding published prose that read as AI-generated rather than his own voice — a real risk given the grading criteria some of this content is written for. This is a distinct convention from Editorial notes above: an Editorial note asks Nicolas for a missing fact or decision; a Voice flag marks prose that is factually fine but rhetorically reads as agent-drafted, for Nicolas to rewrite in his own words.
+
+- When a passage leans on a mechanical rhetorical tell rather than genuine authorial voice — most commonly a symmetric three-part list ("an X that did A, a Y that did B, or a Z that did C") or a paragraph that closes on a generalized, aphoristic sentence detached from the concrete technical or personal content above it — wrap it: `<!-- Voice flag: short reason --> ...passage... <!-- /Voice flag -->`.
+- Do not flag ordinary careful, hedged, or exact prose just because it is formal — `voice-and-identity.md`'s "Informative" dimension deliberately calls for exactness and hedged claims. The tell is the rhetorical flourish, not the formality.
+- Do not rewrite the flagged passage yourself to sound less like AI. A different agent-authored version is still agent-authored; it launders the problem instead of fixing it. Flag it and leave it for Nicolas.
+- `npm run content:check` reports every open Voice flag across all content, with file and line. An open Voice flag counts as unfinished work (`scripts/content/schema.ts`), so a flagged passage fails the build and cannot ship silently.
+- Once Nicolas rewrites a flagged passage, remove both comments; don't leave resolved flags in place the way an answered Editorial note's prompt gets replaced rather than deleted.
 
 ### Nicolas controls
 
@@ -464,7 +485,7 @@ Document the exact Node version, package manager, build command, deploy command,
 
 ### Agents must ask before
 
-- changing the five primary navigation sections or canonical content relationships;
+- changing the four primary navigation sections or canonical content relationships;
 - changing the approved name treatment, palette foundation, type system, voice attributes, homepage posture, or strong visual motif; or resolving a documented prototype gate as a lasting choice without Nicolas's review;
 - rewriting Nicolas's personal voice or publishing draft content;
 - adding a backend, CMS, database, authentication, comments, search service, analytics, tracking, or another hosting provider;
@@ -477,9 +498,9 @@ Agents may make small, reversible implementation decisions consistent with this 
 ## Recommended implementation sequence
 
 1. Confirm the repository state, package manager, current SvelteKit guidance, and Cloudflare Workers/`wrangler.jsonc` settings.
-2. Establish static prerendering, shared layout, the five-item navigation, footer, and foundational design tokens.
-3. Add validated content collections and draft filtering.
-4. Implement Home, About Me, Research & Projects, UBQ, Writing, Photography, and CV routes. Keep missing content in drafts or leave its route unpublished; a public coming-soon state requires Nicolas's approval.
+2. Establish static prerendering, shared layout, the four-item navigation, footer, and foundational design tokens.
+3. Add validated content collections and computed completeness reporting.
+4. Implement Home, About Me, Writing and its collections, Photography, and CV routes. Leave a route unauthored rather than inventing its content; a public coming-soon state requires Nicolas's approval.
 5. Implement UBQ-to-writing and Writing-to-photo-essay cross-links without duplication.
 6. Add responsive media handling, accessibility details, metadata, sitemap, robots rules, and the CV download.
 7. Add automated checks and a production build; inspect representative pages visually and with keyboard/accessibility tools.
@@ -493,9 +514,9 @@ Do not block an early release because Project Archive / Other Projects is omitte
 - Every public route is included in the static build and works on direct navigation and refresh.
 - The UBQ hub has real, supplied links or honest placeholders that are not published as working links.
 - Related UBQ writing is produced from one source of metadata.
-- Photo essays have one canonical URL and are discoverable from both Photography and Writing.
+- Photo essays have one canonical URL under Writing and are discoverable from both Photography and Writing.
 - CV HTML is readable and the approved PDF downloads successfully.
-- Draft content is excluded from production.
+- Every page included in the release is complete; the build refuses an unfinished page rather than serving a partial one.
 - Internal links, image paths, and metadata validate during the build.
 - A top-level `build/404.html` works when a visitor requests an unknown route.
 - Keyboard navigation, focus, landmarks, headings, contrast, alternative text, and reduced-motion behavior have been checked.
@@ -522,6 +543,6 @@ Do not silently answer these on Nicolas's behalf:
 
 ## Research basis
 
-The accompanying `annotated_bibliography.md` records the sources informing this brief. Its main principles are: design around visitor goals, keep navigation shallow and comprehensible, use semantic and accessible structure, separate stable project hubs from dated writing, allow content to grow through tags and links, and keep the implementation static and maintainable.
+The accompanying `annotated_bibliography.md` records the sources informing this brief. Its main principles are: design around visitor goals, keep navigation shallow and comprehensible, use semantic and accessible structure, group focused writing into project collections, allow content to grow through tags and links, and keep the implementation static and maintainable.
 
 Recheck version-sensitive implementation details against the official [SvelteKit static-site documentation](https://svelte.dev/docs/kit/adapter-static), [Cloudflare Workers static assets documentation](https://developers.cloudflare.com/workers/static-assets/), and [Cloudflare Workers custom-domains guide](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/) before configuring production.
