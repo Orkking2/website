@@ -20,6 +20,7 @@ if (
 	const heading = dialog.querySelector('[data-viewer-title]');
 	const caption = dialog.querySelector('[data-viewer-caption]');
 	const position = dialog.querySelector('[data-viewer-position]');
+	const download = dialog.querySelector('[data-viewer-download]');
 	let index = -1;
 	/** @type {Element | null} */
 	let trigger = null;
@@ -37,14 +38,22 @@ if (
 					.forEach((element) => element.setAttribute('sizes', '100vw'));
 				const image = picture.querySelector('img');
 				if (image) {
+					// The head has already asked for this candidate at high priority; say the same
+					// here, as attributes, so the request the viewer makes is the one already in flight.
 					image.loading = 'eager';
-					image.fetchPriority = 'high';
+					image.setAttribute('fetchpriority', 'high');
 				}
 				stage.replaceChildren(picture);
 			}
 			heading.textContent = link.dataset.title || 'Photograph';
 			caption.textContent = link.dataset.caption || '';
 			position.textContent = `${index + 1} / ${links.length}`;
+			if (download instanceof HTMLAnchorElement) {
+				const source = link.closest('figure')?.querySelector('a[data-photo-download]');
+				download.hidden = !(source instanceof HTMLAnchorElement);
+				download.href = source instanceof HTMLAnchorElement ? source.href : '/photography';
+				download.textContent = source?.textContent || 'Download full resolution';
+			}
 		}
 		if (!dialog.open) dialog.showModal();
 		document.documentElement.classList.add('photo-viewer-open');

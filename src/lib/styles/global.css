@@ -824,6 +824,19 @@ h3 {
 	scroll-margin-top: 6rem;
 }
 
+/*
+ * While a link is waiting on the one photograph it named, the frames behind the
+ * viewer are skipped rather than merely lazy: an image the browser is not
+ * rendering is an image it does not request, so the named photograph has the
+ * connection to itself. It is the frame that is skipped, not the figure, because
+ * the frame is already the shape of its photograph — the page is laid out exactly
+ * as it will be, and nothing moves when the frames arrive. The head script sets
+ * this and clears it as soon as that photograph is here.
+ */
+html[data-photo-focus] .gallery-grid__frame {
+	content-visibility: hidden;
+}
+
 .gallery-grid figure:target {
 	outline: 1px solid var(--interaction);
 	outline-offset: 0.3rem;
@@ -2050,7 +2063,7 @@ h3 {
 }
 .photo-viewer[open] {
 	display: grid;
-	grid-template-rows: auto minmax(0, 1fr) auto auto;
+	grid-template-rows: auto minmax(0, 1fr) auto auto auto;
 	gap: 0.75rem;
 }
 .photo-viewer::backdrop {

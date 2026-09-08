@@ -3,8 +3,107 @@ import test from 'node:test';
 import sharp from 'sharp';
 import { applyWatermark, toDms, watermarkOverlay, watermarkText } from './watermark.ts';
 import { captureSortValue } from '../content/schema.ts';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import { encodeMaster, isLosslessWebp } from './lib/master.mjs';
+import { buildVariants, fullResolutionDownload } from './variants.ts';
+import { seedRecord } from './library.mjs';
+import { parsePhoto } from '../content/schema.ts';
 
 const captured = { local: '2026-07-03T19:52:06', offset: '+02:00' };
+
+test('new masters preserve full-size decoded pixels, without a JPEG intermediate or embedded EXIF', async () => {
+	const width = 4000,
+		height = 16;
+	const pixels = Buffer.from(Array.from({ length: width * height * 3 }, (_, i) => (i * 37) % 256));
+	const input = await sharp(pixels, { raw: { width, height, channels: 3 } })
+		.png()
+		.withExif({ IFD0: { Make: 'Private camera' } })
+		.toBuffer();
+	const master = await encodeMaster(sharp(input), { format: 'webp' }).toBuffer();
+	assert.ok(isLosslessWebp(master));
+	const metadata = await sharp(master).metadata();
+	assert.equal(metadata.width, width);
+	assert.equal(metadata.height, height);
+	assert.equal(metadata.exif, undefined);
+	assert.deepEqual(await sharp(master).removeAlpha().raw().toBuffer(), pixels);
+	assert.equal(isLosslessWebp(await sharp(input).webp({ quality: 84 }).toBuffer()), false);
+});
+
+function downloadRecord() {
+	return parsePhoto(
+		{
+			...seedRecord({
+				id: 'photo-abc123',
+				width: 400,
+				height: 300,
+				format: 'webp',
+				capture: { local: captured.local, offset: captured.offset }
+			}),
+			reviewed: true,
+			alt: 'Test photograph',
+			title: 'Test title'
+		},
+		'test.json'
+	);
+}
+
+test('full-resolution downloads losslessly preserve the watermarked pixels', async () => {
+	const photo = downloadRecord();
+	const source = await sharp({
+		create: { width: 400, height: 300, channels: 3, background: '#3a3a3a' }
+	})
+		.webp({ lossless: true })
+		.toBuffer();
+	const output = await fullResolutionDownload(source, photo);
+	const expected = await sharp(source)
+		.composite([{ input: watermarkOverlay(photo, 400, 300), top: 0, left: 0 }])
+		.removeAlpha()
+		.raw()
+		.toBuffer();
+	assert.ok(isLosslessWebp(output));
+	assert.deepEqual(await sharp(output).removeAlpha().raw().toBuffer(), expected);
+	assert.notDeepEqual(expected, await sharp(source).raw().toBuffer());
+	const metadata = await sharp(output).metadata();
+	assert.equal(metadata.exif, undefined);
+	assert.equal(metadata.xmp, undefined);
+	assert.equal(metadata.iptc, undefined);
+});
+
+test('downloads are separate from responsive images, change with the watermark, and skip unfinished records', async () => {
+	const root = await mkdtemp(path.join(os.tmpdir(), 'nebve-download-test-'));
+	try {
+		const masters = path.join(root, 'src/content/photography/.photogrid/masters');
+		await mkdir(masters, { recursive: true });
+		const photo = downloadRecord();
+		await sharp({ create: { width: 400, height: 300, channels: 3, background: '#5a4a3a' } })
+			.webp({ lossless: true })
+			.toFile(path.join(masters, `${photo.id}.webp`));
+		const [image] = await buildVariants(
+			[photo, { ...photo, id: 'unfinished', reviewed: false }],
+			root
+		);
+		assert.ok(image.download);
+		assert.ok(!image.srcset.includes('-full'));
+		assert.ok(!image.webpSrcset.includes('-full'));
+		assert.ok(isLosslessWebp(await readFile(path.join(root, 'static', image.download.src))));
+		const [updated] = await buildVariants([{ ...photo, title: 'Revised title' }], root);
+		assert.notEqual(updated.download?.src, image.download.src);
+		await assert.rejects(readFile(path.join(root, 'static', image.download.src)), {
+			code: 'ENOENT'
+		});
+		await writeFile(
+			path.join(masters, `${photo.id}.webp`),
+			await sharp({ create: { width: 400, height: 300, channels: 3, background: '#5a4a3a' } })
+				.webp({ quality: 84 })
+				.toBuffer()
+		);
+		await assert.rejects(buildVariants([photo], root), /must be lossless/);
+	} finally {
+		await rm(root, { recursive: true, force: true });
+	}
+});
 
 test('the mark reads site, place in degrees, then the spelled-out date and time', () => {
 	assert.equal(

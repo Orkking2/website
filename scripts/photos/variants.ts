@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 import { fileExists, projectRoot } from '../content/index.ts';
@@ -11,6 +11,7 @@ import {
 	type PhotoRecord
 } from '../content/schema.ts';
 import { watermarkOverlay, watermarkSettings } from './watermark.ts';
+import { isLosslessWebp } from './lib/master.mjs';
 
 // Implementation candidates, pending Nicolas's cross-browser color/quality review.
 export const variantSettings = {
@@ -19,6 +20,28 @@ export const variantSettings = {
 	webpQuality: 84,
 	version: 1
 };
+
+export const downloadSettings = { lossless: true, effort: 4, version: 1 };
+
+/** Composite at full resolution, with no lossy intermediate or final encoding. */
+export function fullResolutionDownload(buffer: Buffer, photo: PhotoRecord) {
+	return sharp(buffer)
+		.toColourspace('srgb')
+		.composite([
+			{
+				input: watermarkOverlay(
+					{ title: titleOf(photo), captured: photo.captured, coordinates: photo.coordinates },
+					photo.asset.width,
+					photo.asset.height
+				),
+				top: 0,
+				left: 0
+			}
+		])
+		.webp({ lossless: true, effort: downloadSettings.effort })
+		.withIccProfile('srgb')
+		.toBuffer();
+}
 
 export async function inspectImage(filename: string, expected?: { width: number; height: number }) {
 	const metadata = await sharp(filename).metadata();
@@ -58,9 +81,15 @@ export async function buildVariants(
 	const expectedFiles = new Set<string>();
 	const images: GalleryImage[] = [];
 	for (const photo of records.filter(isReady)) {
-		const master = path.join(root, `src/content/photography/.photogrid/masters/${photo.id}.jpg`);
+		const master = path.resolve(
+			root,
+			'src/content/photography/.photogrid/records',
+			photo.asset.master
+		);
 		await inspectImage(master, photo.asset);
 		const buffer = await readFile(master);
+		if (photo.asset.format === 'webp' && !isLosslessWebp(buffer))
+			throw new Error(`${photo.id}: The full-resolution master must be lossless WebP.`);
 		// The mark is part of what a served file is, so its settings and text belong in the cache key.
 		const mark = {
 			title: titleOf(photo),
@@ -74,6 +103,36 @@ export async function buildVariants(
 			.update(JSON.stringify(mark))
 			.digest('hex')
 			.slice(0, 12);
+		let download: GalleryImage['download'];
+		if (photo.asset.format === 'webp') {
+			const downloadHash = createHash('sha256')
+				.update(buffer)
+				.update(JSON.stringify(downloadSettings))
+				.update(JSON.stringify(watermarkSettings))
+				.update(JSON.stringify(mark))
+				.digest('hex')
+				.slice(0, 12);
+			const filename = `${photo.id}.${downloadHash}-full.webp`;
+			const target = path.join(outputDirectory, filename);
+			expectedFiles.add(filename);
+			if (!(await fileExists(target))) {
+				const pixels = await fullResolutionDownload(buffer, photo);
+				await writeFile(`${target}.tmp`, pixels);
+				await rename(`${target}.tmp`, target);
+			}
+			await inspectImage(target, photo.asset);
+			const bytes = (await stat(target)).size;
+			if (bytes > 25 * 1024 * 1024)
+				throw new Error(
+					`${photo.id}: Lossless download exceeds the 25 MiB static-asset limit. Keep the full-resolution source and review a different delivery option.`
+				);
+			download = {
+				src: `/images/photography/${filename}`,
+				bytes,
+				width: photo.asset.width,
+				height: photo.asset.height
+			};
+		}
 		const widths = [
 			...new Set([
 				...variantSettings.widths.filter((width) => width < photo.asset.width),
@@ -115,6 +174,7 @@ export async function buildVariants(
 			fallbackSrc: formats.jpeg[Math.min(1, formats.jpeg.length - 1)].split(' ')[0],
 			srcset: formats.jpeg.join(', '),
 			webpSrcset: formats.webp.join(', '),
+			...(download ? { download } : {}),
 			title: titleOf(photo),
 			alt: photo.alt || '',
 			caption: photo.caption,

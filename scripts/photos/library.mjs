@@ -14,6 +14,7 @@ import {
 	writeJsonAtomic
 } from './lib/core.mjs';
 import { applyWatermark, watermarkSettings, watermarkText } from './watermark.ts';
+import { isReady, parsePhoto } from '../content/schema.ts';
 
 /**
  * .local/photography is the library: the photographs this site hosts, kept as the
@@ -91,12 +92,13 @@ async function readIndex(paths) {
 async function deriveImage(paths, file, id) {
 	await mkdir(paths.masters, { recursive: true });
 	await ensurePrivateDirectory(paths.images);
-	const master = path.join(paths.masters, `${id}.jpg`);
+	const master = path.join(paths.masters, `${id}.webp`);
 	const [result] = await processImages([
 		{
 			key: id,
 			source: file.absolute,
 			output: master,
+			format: 'webp',
 			maxPixelSize: MASTER_MAX_PIXELS,
 			quality: MASTER_QUALITY
 		}
@@ -107,10 +109,12 @@ async function deriveImage(paths, file, id) {
 		.resize({ width: PREVIEW_MAX_PIXELS, withoutEnlargement: true })
 		.jpeg({ quality: PREVIEW_QUALITY })
 		.toFile(cacheFile(paths, id, 'preview.jpg'));
+	await rm(cacheFile(paths, id, 'marked.txt'), { force: true });
 	const capture = parseExifCapture(result.capture);
 	const gps = result.gpsCoordinates;
 	return {
 		id,
+		format: 'webp',
 		width: result.outputWidth,
 		height: result.outputHeight,
 		capture: { local: capture.localValue, offset: capture.offset, source: capture.source },
@@ -153,8 +157,8 @@ export function seedRecord(derived) {
 		schemaVersion: 1,
 		id: derived.id,
 		asset: {
-			master: `../masters/${derived.id}.jpg`,
-			format: 'jpeg',
+			master: `../masters/${derived.id}.${derived.format === 'webp' ? 'webp' : 'jpg'}`,
+			format: derived.format || 'jpeg',
 			width: derived.width,
 			height: derived.height,
 			colorSpace: 'sRGB',
@@ -174,6 +178,28 @@ export function seedRecord(derived) {
 		...(derived.coordinates ? { coordinates: derived.coordinates } : {}),
 		gallery: { included: true }
 	};
+}
+
+/** Re-decode a legacy master from its private source, keeping all reviewed editorial fields. */
+export async function upgradeMaster(item, record, paths = libraryPaths()) {
+	if (record.asset.format === 'webp') return { item, record };
+	const source = path.resolve(paths.root, item.source);
+	const relative = path.relative(paths.root, source);
+	if (relative.startsWith('..') || path.isAbsolute(relative))
+		throw new Error('Invalid source path.');
+	// Verify the source identity before replacing a reviewed photograph's pixels.
+	if (`photo-${(await hashFile(source)).slice(0, 12)}` !== record.id)
+		throw new Error(`${record.id}: The original no longer matches this photograph.`);
+	const derived =
+		item.format === 'webp'
+			? await readJson(cacheFile(paths, record.id, 'json'))
+			: await deriveImage(paths, { absolute: source, relative }, record.id);
+	const updated = { ...record, asset: seedRecord(derived).asset };
+	await writeJsonAtomic(cacheFile(paths, record.id, 'json'), derived);
+	await writeJsonAtomic(path.join(paths.records, `${record.id}.json`), updated, 0o644);
+	// This is the replaceable, bounded JPEG master, never the private original.
+	await rm(path.join(paths.masters, `${record.id}.jpg`), { force: true });
+	return { item: { ...item, ...derived }, record: updated };
 }
 
 /**
@@ -268,7 +294,7 @@ export async function planScan(paths = libraryPaths()) {
  * Only files whose size or modification time changed are re-read, and only
  * photographs with no derived data are decoded.
  */
-export async function scanLibrary({ onProgress, paths = libraryPaths() } = {}) {
+export async function scanLibrary({ onProgress, paths = libraryPaths(), readyOnly = false } = {}) {
 	await ensurePrivateDirectory(paths.root);
 	await ensurePrivateDirectory(paths.data);
 	await ensurePrivateDirectory(paths.images);
@@ -286,11 +312,18 @@ export async function scanLibrary({ onProgress, paths = libraryPaths() } = {}) {
 		const hash = unchanged ? cached.hash : await hashFile(file.absolute);
 		const id = `photo-${hash.slice(0, 12)}`;
 		if (entries[file.relative]) continue;
+		entries[file.relative] = { hash, size: stats.size, mtimeMs: stats.mtimeMs };
+		if (readyOnly) {
+			const record = await readJson(path.join(paths.records, `${id}.json`)).catch(() => null);
+			if (!record || !isReady(parsePhoto(record, id))) continue;
+		}
 		const derivedFile = cacheFile(paths, id, 'json');
 		let derived = await readJson(derivedFile).catch(() => null);
 		const complete =
 			derived &&
-			(await pathExists(path.join(paths.masters, `${id}.jpg`))) &&
+			(await pathExists(
+				path.join(paths.masters, `${id}.${derived.format === 'webp' ? 'webp' : 'jpg'}`)
+			)) &&
 			(await pathExists(cacheFile(paths, id, 'preview.jpg')));
 		if (!complete) {
 			onProgress?.({ relative: file.relative, id });
@@ -298,7 +331,6 @@ export async function scanLibrary({ onProgress, paths = libraryPaths() } = {}) {
 			await writeJsonAtomic(derivedFile, derived);
 			derivedCount += 1;
 		}
-		entries[file.relative] = { hash, size: stats.size, mtimeMs: stats.mtimeMs };
 		items.push({ ...derived, id, source: file.relative, hash });
 	}
 
@@ -309,6 +341,13 @@ export async function scanLibrary({ onProgress, paths = libraryPaths() } = {}) {
 	for (const item of items) {
 		const record = path.join(paths.records, `${item.id}.json`);
 		if (!(await pathExists(record))) await writeJsonAtomic(record, seedRecord(item), 0o644);
+		const current = parsePhoto(await readJson(record), record);
+		if (isReady(current) && current.asset.format === 'jpeg') {
+			onProgress?.({ relative: item.source, id: item.id });
+			const upgraded = await upgradeMaster(item, current, paths);
+			Object.assign(item, upgraded.item);
+			derivedCount += 1;
+		}
 	}
 
 	return { items, skipped, derivedCount };

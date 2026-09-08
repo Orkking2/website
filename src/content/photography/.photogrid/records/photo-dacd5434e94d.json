@@ -2,10 +2,10 @@
 	"schemaVersion": 1,
 	"id": "photo-dacd5434e94d",
 	"asset": {
-		"master": "../masters/photo-dacd5434e94d.jpg",
-		"format": "jpeg",
-		"width": 2400,
-		"height": 3200,
+		"master": "../masters/photo-dacd5434e94d.webp",
+		"format": "webp",
+		"width": 3024,
+		"height": 4032,
 		"colorSpace": "sRGB",
 		"orientation": 1
 	},

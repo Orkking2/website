@@ -83,16 +83,16 @@ Because the mark is part of what a served file is, the watermark settings and te
 
 ## What reaches the repository
 
-| Location                                      | Contents                                                   | Tracked |
-| --------------------------------------------- | ---------------------------------------------------------- | ------- |
-| `.local/photography/`                         | Originals, untouched                                       | No      |
-| `.local/photography/.data/`                   | Hash-keyed cache and previews                              | No      |
-| `src/content/photography/.photogrid/masters/` | Bounded sRGB JPEG masters, no EXIF, no GPS, no device data | Yes     |
-| `src/content/photography/.photogrid/records/` | The public record for each photograph                      | Yes     |
-| `src/content/writing/**/*.md`                 | Which photographs an essay holds, and their names          | Yes     |
-| `static/images/photography/`                  | Watermarked variants, generated at build                   | No      |
+| Location                                      | Contents                                                                                              | Tracked |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------- |
+| `.local/photography/`                         | Originals, untouched                                                                                  | No      |
+| `.local/photography/.data/`                   | Hash-keyed cache and previews                                                                         | No      |
+| `src/content/photography/.photogrid/masters/` | Full-resolution lossless sRGB WebP masters, no EXIF, GPS, or device data (legacy JPEG until upgraded) | Yes     |
+| `src/content/photography/.photogrid/records/` | The public record for each photograph                                                                 | Yes     |
+| `src/content/writing/**/*.md`                 | Which photographs an essay holds, and their names                                                     | Yes     |
+| `static/images/photography/`                  | Watermarked variants, generated at build                                                              | No      |
 
-Masters are capped at 3200 pixels at quality 0.92 and stripped of all embedded metadata. `npm run photos:guard` and the `--source-only` check in `npm run build` scan for private paths and original filenames leaking into tracked files or build output.
+New masters retain the original decoded dimensions and use lossless WebP in 8-bit sRGB, with an sRGB profile but no embedded EXIF, GPS, or device metadata. The source is decoded and oriented before encoding, without a JPEG intermediate. This preserves the decoded SDR pixels, not camera-file bytes or an HDR/high-bit-depth representation. Legacy JPEG masters remain readable until upgraded from the private original. `npm run photos:guard` and the `--source-only` check in `npm run build` scan for private paths and original filenames leaking into tracked files or build output.
 
 ## Publishing
 
@@ -121,4 +121,10 @@ Two consequences worth knowing. The markup is ordered by column rather than by d
 
 Photographs placed in an essay open that same viewer, and the page shell carries it wherever there are photographs to look at — so a page with neither ships no viewer and no script.
 
-A photograph can be shared as `/photography#photo-ID`. IDs survive title edits, reordering, and regenerated image filenames. Viewer navigation replaces the selected photo in the URL, and reloading restores it. The largest served image is 2400 pixels wide; the master is not used as the browser fallback.
+A photograph can be shared as `/photography#photo-ID`. IDs survive title edits, reordering, and regenerated image filenames. Viewer navigation replaces the selected photo in the URL, and reloading restores it. The largest display image is 2400 pixels wide; the master is not used as the browser fallback. A separate full-resolution lossless WebP download is watermarked at its native dimensions and linked from the gallery, essays, and viewer. It is excluded from srcsets and preloads, so it transfers only on request.
+
+## Lossless downloads
+
+Run `npm run photos:upgrade` to upgrade existing reviewed photographs from their private originals. It verifies each original against the stable photo ID, preserves reviewed editorial metadata, writes a full-resolution lossless WebP master, and replaces the old bounded JPEG master. The studio also upgrades legacy masters on review. Unfinished masters remain untracked. Commit each ready WebP master with its updated record and the removal of its old JPEG; a clean Linux build uses only these portable sources and never reads the private library.
+
+The build composites the approved watermark onto decoded master pixels at full resolution and encodes them with `lossless: true`. Fingerprinted download URLs change when pixels, watermark text, or encoding settings change. Download links show format and file size and work without JavaScript. The normal gallery still uses resized lossy WebP/JPEG for economical browsing. WebP offers incremental decoding but not progressive whole-image refinement; it is not a substitute for small initial images. A 25 MiB per-file guard catches downloads that cannot be served by the current static host.

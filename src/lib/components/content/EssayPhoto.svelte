@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ResponsivePhoto from './ResponsivePhoto.svelte';
+	import PhotoDownload from './PhotoDownload.svelte';
 	import type { EssayImage } from '$lib/content/catalog';
 
 	/**
@@ -29,10 +30,11 @@
 	>
 		<ResponsivePhoto photo={image} {sizes} />
 	</a>
-	{#if image.caption || image.title}
+	{#if image.caption || image.title || image.download}
 		<figcaption>
 			{#if image.title}<b>{image.title}</b>{/if}
 			{#if image.caption}<span>{image.caption}</span>{/if}
+			<PhotoDownload photo={image} />
 		</figcaption>
 	{/if}
 </figure>

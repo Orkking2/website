@@ -81,7 +81,7 @@ Edits save straight into `src/content/photography/.photogrid/`, which is ordinar
 
 The studio is also where photo essays are assembled: import photographs into an essay, name each one so the prose can refer to it, set the order and the cover. An essay's own frontmatter is the single record of what it holds.
 
-Every served image carries `nebve.com 52°21'29.7"N 4°52'50.8"E 03 Jul 2026 19:52:06` burned into its pixels, drawn after each resize so it stays legible at every size and through lossy compression. Coordinates read in degrees, minutes and seconds, and the month is spelled out so a date cannot be read in the wrong order. Committed masters are clean, bounded, sRGB, and stripped of EXIF, GPS, and device data.
+Every served image carries `nebve.com 52°21'29.7"N 4°52'50.8"E 03 Jul 2026 19:52:06` burned into its pixels, drawn after each resize so it stays legible at every size and through lossy compression. Coordinates read in degrees, minutes and seconds, and the month is spelled out so a date cannot be read in the wrong order. New committed masters are full-resolution lossless WebP in 8-bit sRGB, stripped of EXIF, GPS, and device data. `npm run photos:upgrade` upgrades existing reviewed JPEG masters directly from the private originals, preserving their editorial records. The site provides optional full-resolution, watermarked lossless WebP downloads; normal gallery images stay small, and the downloads are never preloaded.
 
 See [`docs/photography-intake.md`](docs/photography-intake.md) for the library layout, the `.data` cache, and what reaches the repository.
 

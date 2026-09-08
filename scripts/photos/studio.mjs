@@ -12,6 +12,7 @@ import {
 	planScan,
 	pruneCache,
 	scanLibrary,
+	upgradeMaster,
 	watermarkedPreview
 } from './library.mjs';
 import { UNTITLED, isReady, parsePhoto, photoIssues, titleOf } from '../content/schema.ts';
@@ -501,9 +502,13 @@ async function run() {
 					jsonResponse(response, 404, { error: 'Not in the library.' });
 					return;
 				}
-				const updated = applyPatch(await readRecord(id), await readBody(request));
-				await writeJsonAtomic(recordFile(id), updated, 0o644);
+				let updated = applyPatch(await readRecord(id), await readBody(request));
 				const item = library.items.find((candidate) => candidate.id === id);
+				if (item && isReady(updated) && updated.asset.format === 'jpeg') {
+					const upgraded = await upgradeMaster(item, updated, paths);
+					updated = upgraded.record;
+					Object.assign(item, upgraded.item);
+				} else await writeJsonAtomic(recordFile(id), updated, 0o644);
 				jsonResponse(
 					response,
 					200,

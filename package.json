@@ -17,6 +17,7 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"photos": "node scripts/photos/studio.mjs",
+		"photos:upgrade": "node scripts/photos/upgrade.mjs",
 		"photos:guard": "node scripts/photos/private-media-guard.mjs --output build",
 		"test:photos": "node --test scripts/photos/*.test.mjs",
 		"quality": "npm run content:check && npm run check && npm run lint && npm run test:photos && npm run test:content && npm run build",

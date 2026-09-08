@@ -2,10 +2,10 @@
 	"schemaVersion": 1,
 	"id": "photo-ebc2cdc7af24",
 	"asset": {
-		"master": "../masters/photo-ebc2cdc7af24.jpg",
-		"format": "jpeg",
-		"width": 2400,
-		"height": 3200,
+		"master": "../masters/photo-ebc2cdc7af24.webp",
+		"format": "webp",
+		"width": 3024,
+		"height": 4032,
 		"colorSpace": "sRGB",
 		"orientation": 1
 	},

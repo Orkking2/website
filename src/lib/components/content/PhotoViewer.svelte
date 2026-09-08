@@ -20,6 +20,9 @@
 	</header>
 	<div class="photo-viewer__image" data-viewer-image></div>
 	<p data-viewer-caption class="photo-viewer__caption"></p>
+	<div class="photo-viewer__download">
+		<a href="/photography" download data-viewer-download hidden>Download full resolution</a>
+	</div>
 	<nav aria-label="Photograph navigation">
 		<button type="button" data-viewer-previous>Previous</button>
 		<span data-viewer-position role="status" aria-live="polite"></span>

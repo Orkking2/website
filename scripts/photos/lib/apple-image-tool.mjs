@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import decodeHeic from 'heic-decode';
 import sharp from 'sharp';
+import { encodeMaster } from './master.mjs';
 import { ensurePrivateDirectory, hashFile, pathExists, PRIVATE_PHOTO_ROOT } from './core.mjs';
 
 const TOOL_SOURCE = fileURLToPath(new URL('../macos-image-tool.m', import.meta.url));
@@ -52,7 +53,7 @@ function runProcess(command, arguments_, options = {}) {
 export async function ensureAppleImageTool() {
 	if (process.platform !== 'darwin') {
 		throw new Error(
-			'The private HEIC intake tool currently requires macOS because it uses Apple ImageIO and Core Graphics. Committed publication masters remain ordinary JPEG files for portable builds.'
+			'The private HEIC intake tool currently requires macOS because it uses Apple ImageIO and Core Graphics. Committed publication masters remain portable image files.'
 		);
 	}
 
@@ -189,21 +190,7 @@ export async function processImages(requests) {
 				pipeline = sharp(request.source).autoOrient();
 			}
 
-			const info = await pipeline
-				.resize({
-					width: request.maxPixelSize,
-					height: request.maxPixelSize,
-					fit: 'inside',
-					withoutEnlargement: true
-				})
-				.toColourspace('srgb')
-				.jpeg({
-					quality: Math.round(request.quality * 100),
-					progressive: true,
-					chromaSubsampling: '4:4:4'
-				})
-				.withIccProfile('srgb')
-				.toFile(temporaryOutput);
+			const info = await encodeMaster(pipeline, request).toFile(temporaryOutput);
 			const outputMetadata = await sharp(temporaryOutput).metadata();
 			const statistics = await sharp(temporaryOutput).stats();
 			const outputSensitiveMetadata = [];

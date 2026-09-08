@@ -198,7 +198,8 @@ export const photoSchema = z.strictObject({
 	id: slugSchema,
 	asset: z.strictObject({
 		master: z.string(),
-		format: z.literal('jpeg'),
+		// JPEG is retained for older, bounded masters until reimported from the source.
+		format: z.enum(['jpeg', 'webp']),
 		width: z.number().int().positive(),
 		height: z.number().int().positive(),
 		colorSpace: z.literal('sRGB'),
@@ -250,8 +251,9 @@ export function parsePhoto(raw: unknown, file: string): PhotoRecord {
 				.join('\n')
 		);
 	const photo = result.data;
-	if (photo.asset.master !== `../masters/${photo.id}.jpg`)
-		throw new Error(`${file} → asset.master: Use ../masters/${photo.id}.jpg.`);
+	const extension = photo.asset.format === 'webp' ? 'webp' : 'jpg';
+	if (photo.asset.master !== `../masters/${photo.id}.${extension}`)
+		throw new Error(`${file} → asset.master: Use ../masters/${photo.id}.${extension}.`);
 	if (photo.decorative && photo.alt)
 		throw new Error(`${file} → alt: A decorative image must have empty alternative text.`);
 	return photo;
@@ -286,6 +288,7 @@ export interface GalleryImage {
 	fallbackSrc: string;
 	srcset: string;
 	webpSrcset: string;
+	download?: { src: string; bytes: number; width: number; height: number };
 	title: string;
 	alt: string;
 	caption: string | null;

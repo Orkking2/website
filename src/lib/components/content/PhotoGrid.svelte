@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { dealIntoColumns, galleryImages } from '$lib/content/catalog';
+	import { photoPreload } from '$lib/content/photo-preload';
 	import ResponsivePhoto from './ResponsivePhoto.svelte';
+	import PhotoDownload from './PhotoDownload.svelte';
 
 	/**
 	 * The gallery of selected photographs, placed where the writing wants it.
@@ -16,7 +18,17 @@
 	// Dealt once, when the page is built. Each photograph goes to whichever column is
 	// shortest so far, so the columns stay level and a reader meets them in order.
 	const columns = dealIntoColumns(galleryImages, 2);
+	// Named once, because the preload in the head has to ask for the same candidate the
+	// grid will ask for; two copies of this would quietly fetch the same photograph twice.
+	const gridSizes =
+		'(min-width: 90rem) 44rem, (min-width: 42rem) calc((100vw - 2rem) / 2), calc(100vw - 2rem)';
 </script>
+
+<svelte:head>
+	<!-- Generated candidates are escaped by photoPreload; run before body images are discovered. -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html photoPreload(galleryImages, gridSizes)}
+</svelte:head>
 
 <section aria-labelledby={headingId}>
 	<h2 id={headingId} class="visually-hidden">{label}</h2>
@@ -41,16 +53,14 @@
 								data-caption={[photo.caption, photo.location].filter(Boolean).join(' — ')}
 								aria-label={`View ${photo.title || 'photograph'}`}
 							>
-								<ResponsivePhoto
-									{photo}
-									sizes="(min-width: 90rem) 44rem, (min-width: 42rem) calc((100vw - 2rem) / 2), calc(100vw - 2rem)"
-									eager={index === 0}
-								/>
+								<!-- Every frame waits: the head decides which photograph is fetched first. -->
+								<ResponsivePhoto {photo} sizes={gridSizes} />
 							</a>
 							<figcaption>
 								{#if photo.title}<span class="visually-hidden">{photo.title}. </span>{/if}
 								{#if photo.caption}<p>{photo.caption}</p>{/if}
 								{#if photo.location}<p>{photo.location}</p>{/if}
+								<PhotoDownload {photo} />
 								<!-- <div class="gallery-caption__links">
 							<a
 								href={`/photography#${photo.id}`}

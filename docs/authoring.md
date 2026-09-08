@@ -152,7 +152,7 @@ That last one is what we observe in [the tombstone below](#tombstone).
 
 The name doubles as the link target, so `#tombstone` works without writing an id by hand. Any photograph you do not place yourself closes the page, in the order you named it — so an essay of six photographs with no `<Photo>` tags still reads as a sequence.
 
-A placed photograph takes the same width as the writing around it, so the column reads as one, and clicking it opens the same viewer the gallery uses — previous/next, Escape to close, and a URL that reopens it. Without JavaScript the frame is still a link, to the largest image that is served.
+A placed photograph takes the same width as the writing around it, so the column reads as one, and clicking it opens the same viewer the gallery uses — previous/next, Escape to close, and a URL that reopens it. Without JavaScript the frame is still a link to the largest display variant. Photographs prepared with a full-resolution lossless master also show a separate watermarked WebP download link, with its file size, both here and in the gallery and viewer.
 
 `npm run photos` edits the same list, and is the intended way to import a photograph into an essay, name it, reorder, and choose the cover. It writes all of that back into this frontmatter. Renaming there also rewrites `<Photo of="…">` and `#name` links in the body, so a rename cannot quietly break the page.
 

@@ -181,7 +181,7 @@ export async function readContent(root = projectRoot, { strict = true } = {}) {
 		// A ready photograph is served, so its master must be present to build from. An unfinished
 		// one is skipped by the build, and its master may still be local-only; requiring the file
 		// here would refuse the whole build for work in progress. The path itself is pinned to
-		// ../masters/<id>.jpg by the schema, so nothing is left unchecked by deferring this.
+		// ../masters/<id>.<format> by the schema, so nothing is left unchecked by deferring this.
 		if (isReady(photo))
 			await assertContainedFile(
 				mastersDirectory,
