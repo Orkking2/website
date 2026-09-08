@@ -3,8 +3,8 @@
 	let {
 		photo,
 		sizes = '100vw',
-		priority = false
-	}: { photo: GalleryImage; sizes?: string; priority?: boolean } = $props();
+		eager = false
+	}: { photo: GalleryImage; sizes?: string; eager?: boolean } = $props();
 </script>
 
 <picture>
@@ -16,8 +16,8 @@
 		alt={photo.decorative ? '' : photo.alt}
 		width={photo.width}
 		height={photo.height}
-		loading={priority ? 'eager' : 'lazy'}
-		fetchpriority={priority ? 'high' : 'auto'}
+		loading={eager ? 'eager' : 'lazy'}
+		fetchpriority={eager ? 'auto' : 'low'}
 		decoding="async"
 	/>
 </picture>

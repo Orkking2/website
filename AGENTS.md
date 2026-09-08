@@ -421,14 +421,16 @@ Accessibility is part of the definition of done, not a later polish pass.
 1. Author or edit Markdown, structured data, images, and Svelte code locally.
 2. Run formatting, type/content checks, tests, and a production build.
 3. Commit to Git and push to GitHub.
-4. Use a pull request and Cloudflare's preview deployment for meaningful visual or content changes when the repository workflow supports it.
+4. Use a pull request and Cloudflare's preview deployment for meaningful visual or content changes; every non-`main` branch and pull request gets its own preview URL from the same connection.
 5. Review the preview at mobile and desktop sizes.
 6. Merge the approved change to the production branch, expected to be `main` unless the repository says otherwise.
-7. Let Cloudflare rebuild and redeploy the Worker's static assets to `nebve.com`.
+7. Cloudflare rebuilds and redeploys the Worker's static assets to `nebve.com` on its own.
 
-The expected Cloudflare project settings are the repository's production branch (normally `main`), build command `npm run build`, and deploy command `npx wrangler deploy`, which reads `wrangler.jsonc`'s `assets.directory` (`./build`) rather than a separate build-output-directory field. Cloudflare's dashboard defaults new "Workers & Pages" project creation to a Worker; that is correct for this project, not a mistake to redirect away from. This project deliberately uses `@sveltejs/adapter-static` to produce that `build` directory rather than `@sveltejs/adapter-cloudflare`'s `.svelte-kit/cloudflare` output. Attach `nebve.com` through the Workers custom-domain workflow (Settings → Domains & Routes → Add → Custom Domain). Choose one canonical production hostname, normally `https://nebve.com`, and redirect or otherwise deliberately configure alternate `www` and production `*.workers.dev` hostnames.
+**Step 7 is settled infrastructure — take it for granted.** The Git integration is confirmed working end to end: a push to `main` triggers a Cloudflare build and redeploy of `nebve.com`, and a pushed commit is a deployed commit. Do not hedge about whether the deploy will run, do not treat `npm run deploy` as a fallback for it, and do not add manual dashboard steps, retries, or "if the build doesn't trigger" caveats to the documentation. If a deploy ever genuinely fails, that is a specific incident to diagnose against the Cloudflare build log — not a standing property of the workflow to write down.
 
-Document the exact Node version, package manager, build command, deploy command, Worker/assets configuration, environment variables, and custom-domain steps in the repository README once they exist. No secret should be required merely to build public content. Do not change production DNS or deploy publicly without Nicolas's authorization.
+The Cloudflare project is configured with production branch `main`, build command `npm run build`, and deploy command `npx wrangler deploy`, which reads `wrangler.jsonc`'s `assets.directory` (`./build`) rather than a separate build-output-directory field. Cloudflare's dashboard defaults new "Workers & Pages" project creation to a Worker; that is correct for this project, not a mistake to redirect away from. This project deliberately uses `@sveltejs/adapter-static` to produce that `build` directory rather than `@sveltejs/adapter-cloudflare`'s `.svelte-kit/cloudflare` output. `nebve.com` is attached and serving, by `wrangler.jsonc`'s `custom_domain` route rather than a dashboard step, and `https://nebve.com` is the canonical production hostname. The alternate `www` and production `*.workers.dev` hostnames are the one piece of hosting configuration still open — redirect or leave inactive, Nicolas's decision.
+
+The README documents the exact Node version, package manager, build command, deploy command, Worker/assets configuration, environment variables, and custom-domain steps; keep it current when any of them change. No secret should be required merely to build public content. Do not change production DNS or deploy publicly without Nicolas's authorization.
 
 **A passing `npm run quality` is not proof that Cloudflare will build.** It runs against the working tree, which holds untracked files and, on macOS, resolves filenames case-insensitively; Cloudflare builds a clean clone on Linux. A file renamed only by case keeps its old name in git and breaks routes there while looking correct here (this happened to `CV.md` → `cv.md` — see D-024). Before a push that matters, build from a `git worktree` of the commit as the README describes, and record case-only renames with `git mv -f`.
 
@@ -495,7 +497,7 @@ Nicolas explicitly approved this working preference on 2026-09-07, after finding
 - adding a backend, CMS, database, authentication, comments, search service, analytics, tracking, or another hosting provider;
 - publishing contact data, precise photo locations, unpublished research, or unsupported performance claims;
 - copying a template or an inspiration site's distinctive design.
-- linking the live GitHub repository to Cloudflare, making a production deployment, attaching the custom domain, or changing DNS or hostname redirects.
+- linking the live GitHub repository to Cloudflare, pushing to `main` (which deploys to production), attaching the custom domain, or changing DNS or hostname redirects.
 
 Agents may make small, reversible implementation decisions consistent with this brief. Document decisions that affect content authoring, URLs, deployment, accessibility, or future maintenance.
 

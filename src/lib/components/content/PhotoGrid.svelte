@@ -44,7 +44,7 @@
 								<ResponsivePhoto
 									{photo}
 									sizes="(min-width: 90rem) 44rem, (min-width: 42rem) calc((100vw - 2rem) / 2), calc(100vw - 2rem)"
-									priority={index === 0}
+									eager={index === 0}
 								/>
 							</a>
 							<figcaption>

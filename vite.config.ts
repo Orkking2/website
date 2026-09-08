@@ -13,6 +13,9 @@ export default defineConfig(async ({ command }) => {
 		plugins: [
 			contentWatchPlugin(),
 			sveltekit({
+				// Keep the current small stylesheets in the document so text can paint
+				// without another network round trip. Revisit if a sheet exceeds 40 KiB.
+				inlineStyleThreshold: 40 * 1024,
 				extensions: ['.svelte', '.md', '.svx'],
 				// The component imports are added before MDsveX compiles the Markdown.
 				preprocess: [

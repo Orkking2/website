@@ -15,7 +15,7 @@ This is a local, content-first prototype—not a launch-ready site.
 - Pages use explicit `noindex, nofollow` metadata, and `robots.txt` blocks crawling.
 - The proposal supports UBQ's general subject and in-progress status. No expanded name, contribution, architecture, results, performance claims, resource links, personal history, contact details, articles, photographs, CV facts, or downloadable CV have been invented.
 - The approved identity is implemented: absolute black, near-white text, a lime interaction state, Times New Roman throughout, and a lowercase `n` favicon. Exact secondary token values, typographic metrics, link motion, gallery spacing, and the photo-essay transition remain prototype gates awaiting Nicolas's review.
-- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website), and `nebve.com` is live: it serves this project's build over HTTPS with the repository's own `static/_headers` cache policy applied, so the Worker, the custom domain, and the account that owns the DNS zone are all confirmed working (resolving D-008 and D-017). Production deploys from `main` — see "Deploying to Cloudflare Workers" below.
+- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website), and `nebve.com` is live: it serves this project's build over HTTPS with the repository's own `static/_headers` cache policy applied. The Worker, the Git integration, the custom domain, and the account that owns the DNS zone are all confirmed working (D-008, D-017, D-025): **a push to `main` builds and redeploys the site**, with no manual step. See "Deploying to Cloudflare Workers" below.
 
 ## Local development
 
@@ -39,6 +39,35 @@ npm run quality
 ```
 
 `npm run build` creates `build/` with static HTML and assets, then verifies all intended routes, essential page metadata, internal page links, release guards, and the top-level `build/404.html`.
+
+## Loading on slow connections
+
+Pages ship complete HTML with no Svelte hydration dependency. SvelteKit inlines
+stylesheets smaller than 40 KiB (`inlineStyleThreshold` in `vite.config.ts`), so
+the current pages need no separate CSS request before text and navigation can
+render. This trades about 7 KiB of compressed CSS per navigation for fewer network
+round trips; revisit the threshold and split unused styles if the stylesheet grows.
+
+The first gallery photograph is eager with normal fetch priority. Other photographs
+use native lazy loading and low fetch priority; an explicitly opened viewer image
+gets high priority. Native lazy loading may fetch images near the viewport before
+they become visible, and fetch priority is a browser hint, not a strict queue.
+Images retain intrinsic dimensions and async decoding, so their downloads do not
+gate the page shell or cause it to jump when they arrive.
+
+Workers' default browser cache policy revalidates HTML. Only fingerprinted
+`/_app/immutable/*` and `/images/photography/*` files get a year of immutable caching.
+Do not add a global `Cache-Control` rule: Cloudflare combines matching custom
+header values, which would conflict with those asset rules. Photograph filenames
+hash their source pixels and generation settings, so edits receive new URLs.
+
+To check a production build, confirm its HTML has inline styles and no active
+external stylesheets (SvelteKit retains disabled stylesheet links). In browser
+developer tools, test a fresh load with cache disabled
+and a slow network, then block image requests: navigation and prose should remain
+usable. Repeat with JavaScript disabled; only the enhanced photo viewer requires it.
+Measure document TTFB separately from image completion. A slow cache-hit response
+does not by itself establish a post-deployment cache miss.
 
 ## Photography
 
@@ -121,9 +150,9 @@ git worktree remove /tmp/fresh
    - No environment variables are required for public content.
    - **Node version:** `24.20.0` (an `.node-version` file is already committed; add a `NODE_VERSION` environment variable of the same value if Cloudflare doesn't pick it up automatically). This repo was previously pinned to the Node 22 line and hit two chained failures worth knowing about if a future Node bump reintroduces them: `22.22.2` shipped with a broken bundled npm (missing internal `promise-retry`, fixed in `22.22.3` — see Node's own changelog, `deps: upgrade npm to 10.9.8`), and separately `packageManager`'s pinned `npm@12.0.2` requires Node `^22.22.2 || ^24.15.0 || >=26.0.0` — Node 24 (the current Active LTS line) clears both issues at once rather than chasing a narrow compatible patch within Node 22.
 3. Save and deploy. The first build runs against `main` immediately and becomes the project's production deployment at its `*.workers.dev` subdomain.
-4. `wrangler.jsonc` already declares `routes: [{ pattern: "nebve.com", custom_domain: true }]`, so the next deploy after this is pushed attempts to attach `nebve.com` automatically — no manual dashboard click needed, per [Cloudflare's Workers custom-domain guide](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/). This only succeeds if the Cloudflare account running this deploy is the same one that owns `nebve.com`'s DNS zone (Cloudflare's docs: "You cannot create a Custom Domain on... a zone you do not own"); D-008 in `docs/implementation-plan.md` flags that this hasn't been confirmed. If the deploy fails or the domain doesn't attach, check that first. The `www` hostname and the `*.workers.dev` subdomain still need a deliberate decision (redirect to `https://nebve.com`, or stay inactive) — neither is configured yet.
-5. From then on, every push to `main` triggers a new production build and deploy with no further action; every other branch and pull request gets its own preview-deployment URL from the same connection. `static/_headers` sets `Cache-Control: public, max-age=0, must-revalidate` on HTML so a reload after a deploy always serves the new build, while hashed `/_app/immutable/*` assets are cached for a year since a new build gives them new filenames. Both `_headers` and `_redirects` in `static/` are honored by Workers static assets the same way they were under Pages.
+4. `wrangler.jsonc` declares `routes: [{ pattern: "nebve.com", custom_domain: true }]`, so each deploy attaches `nebve.com` itself — no manual dashboard click, per [Cloudflare's Workers custom-domain guide](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/). This is done: the domain is attached and serving, and the deploying Cloudflare account owns its DNS zone. The `www` hostname and the `*.workers.dev` subdomain still need a deliberate decision (redirect to `https://nebve.com`, or stay inactive) — neither is configured yet.
+5. From then on, every push to `main` triggers a new production build and deploy with no further action; every other branch and pull request gets its own preview-deployment URL from the same connection. This is the deployment: a pushed commit is a deployed commit, and nothing else needs to be run or clicked. HTML uses Workers' default `Cache-Control: public, max-age=0, must-revalidate` so a reload after a deploy revalidates the build. `static/_headers` gives hashed `/_app/immutable/*` assets and `/images/photography/*` variants a year of immutable browser caching; changed files receive new filenames. Both `_headers` and `_redirects` in `static/` are honored by Workers static assets the same way they were under Pages.
 
-Local sanity-checks before pushing: `npx wrangler deploy --dry-run` validates `wrangler.jsonc` and lists what would be uploaded without deploying anything; `npm run deploy` runs the real `wrangler deploy` (requires being logged in via `npx wrangler login` first) if a manual deploy from a local machine is ever needed outside the GitHub-connected flow.
+Local sanity-check before pushing: `npx wrangler deploy --dry-run` validates `wrangler.jsonc` and lists what would be uploaded without deploying anything. `npm run deploy` runs a real `wrangler deploy` from a local machine (requires being logged in via `npx wrangler login` first); the GitHub-connected flow is the deployment path, so use this only for a deliberate out-of-band deploy, never to prompt or double-check one that a push already made.
 
 Indexing stays off (`site.indexable = false` in `src/lib/data/site.ts`, `noindex, nofollow` metadata, `robots.txt` disallow) until Nicolas explicitly flips it — attaching the domain makes the site reachable, not indexed.
