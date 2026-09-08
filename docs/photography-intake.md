@@ -28,7 +28,9 @@ It has three sections:
 
 Useful flags: `--port <number>` (default 4179, so a bookmarked tab keeps working), `--open` to launch a browser as well, `--prune` to drop cache entries for photographs that have left the library, `--library <path>` to point at a different library, and `--yes` to skip the bulk-read confirmation.
 
-The one confirmation it asks for is not editorial. A new photograph writes a publication master into the repository, and those are committed permanently, so a first run over more than 25 new files tells you how much history that adds before it starts.
+The one confirmation it asks for is not editorial. A new photograph writes a publication master into the working tree, so a first run over more than 25 new files tells you how much that adds before it starts.
+
+Writing a master is not the same as committing one. Records are committed for the whole library, but a master enters git history only once its photograph is **ready** (D-024) — so an unfinished photograph costs working-tree space and nothing permanent, and discarding one during curation leaves no trace. `git status` listing unfinished masters as untracked is the expected state, not an oversight. When you mark a photograph reviewed, commit its master along with the record.
 
 ## Unfinished, then reviewed
 

@@ -15,7 +15,7 @@ This is a local, content-first prototype—not a launch-ready site.
 - Pages use explicit `noindex, nofollow` metadata, and `robots.txt` blocks crawling.
 - The proposal supports UBQ's general subject and in-progress status. No expanded name, contribution, architecture, results, performance claims, resource links, personal history, contact details, articles, photographs, CV facts, or downloadable CV have been invented.
 - The approved identity is implemented: absolute black, near-white text, a lime interaction state, Times New Roman throughout, and a lowercase `n` favicon. Exact secondary token values, typographic metrics, link motion, gallery spacing, and the photo-essay transition remain prototype gates awaiting Nicolas's review.
-- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website); pushes to `main` are meant to drive the Cloudflare Workers production deployment once it's connected (see "Deploying to Cloudflare Workers" below). Cloudflare itself has not finished connecting yet — that step needs an interactive dashboard login and is Nicolas's to complete.
+- The repository is connected to GitHub at [`Orkking2/website`](https://github.com/Orkking2/website), and `nebve.com` is live: it serves this project's build over HTTPS with the repository's own `static/_headers` cache policy applied, so the Worker, the custom domain, and the account that owns the DNS zone are all confirmed working (resolving D-008 and D-017). Production deploys from `main` — see "Deploying to Cloudflare Workers" below.
 
 ## Local development
 
@@ -101,7 +101,16 @@ Before making the site public:
 
 This project deploys as a Cloudflare Worker configured for **static assets only** — `wrangler.jsonc` has no `main` script, so requests never reach a Worker script at all; Cloudflare serves the prerendered `build` directory directly. This is deliberate, not a workaround: Cloudflare's dashboard now defaults new "Workers & Pages" project creation to a Git-connected Worker rather than classic Pages, and Cloudflare's own documentation describes Workers as its primary platform going forward. A static-assets Worker is architecturally identical to what Pages provided here — same static output, no server code, no backend — so there's no reason to fight the platform's default.
 
-The GitHub repository ([`Orkking2/website`](https://github.com/Orkking2/website)) is the source of truth; Cloudflare still needs to be pointed at it. That first connection requires an interactive login to the Cloudflare account that manages `nebve.com`'s DNS, so it has to happen in the dashboard rather than from here — see D-008 in `docs/implementation-plan.md` for why the account to use isn't settled yet.
+The GitHub repository ([`Orkking2/website`](https://github.com/Orkking2/website)) is the source of truth, and the connection is made: `nebve.com` serves this project's build today. The numbered steps below record how that was set up, and are worth rereading only if the Worker is ever rebuilt from scratch.
+
+One property of this setup is worth keeping in mind while authoring. Cloudflare builds on Linux, where filenames are case-sensitive; macOS is case-insensitive by default, so a file renamed only by case (`CV.md` → `cv.md`) keeps its old name in git while looking correct locally, and `npm run quality` passes on your machine while the Cloudflare build fails on a route it cannot find. `git mv -f old new` records such a rename properly. To check a commit the way Cloudflare will see it, build from a clean checkout of it rather than from your working tree:
+
+```sh
+git worktree add --detach /tmp/fresh HEAD
+ln -s "$PWD/node_modules" /tmp/fresh/node_modules
+(cd /tmp/fresh && npx svelte-kit sync && npm run build)
+git worktree remove /tmp/fresh
+```
 
 1. In the Cloudflare dashboard, go to **Workers & Pages → Create application**, connect the Cloudflare GitHub App to `Orkking2/website` (or reuse an existing installation), and let it create a Worker (this is the correct, expected path — don't redirect to the Pages tab).
 2. Set the build configuration:
