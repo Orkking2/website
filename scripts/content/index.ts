@@ -157,7 +157,8 @@ export function comparePages(a: PageNode, b: PageNode) {
 export async function readContent(root = projectRoot, { strict = true } = {}) {
 	const incomplete: string[] = [];
 	const pages: PageNode[] = [];
-	await walk(root, [], pages, await modificationTimes(root, contentDirectory));
+	const modified = await modificationTimes(root, contentDirectory);
+	await walk(root, [], pages, modified);
 
 	const byRoute = new Map(pages.map((page) => [page.route, page]));
 	for (const page of pages) {
@@ -166,6 +167,10 @@ export async function readContent(root = projectRoot, { strict = true } = {}) {
 	}
 	// Parents precede descendants in the walk, so propagate dates bottom-up before sorting.
 	for (const page of pages.toReversed()) {
+		// A Writing collection is ranked by the articles it lists. Editing its
+		// introduction or cover should not outrank a newer article elsewhere.
+		if (page.children.length && (page.route === '/writing' || page.route.startsWith('/writing/')))
+			page.modified = Math.max(...page.children.map((route) => byRoute.get(route)!.modified));
 		const parent = page.parent ? byRoute.get(page.parent) : undefined;
 		if (parent) parent.modified = Math.max(parent.modified, page.modified);
 	}
@@ -307,5 +312,6 @@ export async function readContent(root = projectRoot, { strict = true } = {}) {
 		if (strict) throw new Error(report);
 		console.warn(report);
 	}
+	await modified.save();
 	return { pages, byRoute, photos, photoEssays, incomplete };
 }

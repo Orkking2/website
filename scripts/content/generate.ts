@@ -130,6 +130,7 @@ export function contentWatchPlugin(): Plugin {
 		configureServer(server) {
 			server.watcher.add([path.join(projectRoot, 'src/content'), path.join(projectRoot, 'static')]);
 			const update = (filename: string) => {
+				if (filename === path.join(projectRoot, 'src/content/.modification-times.json')) return;
 				const authored = filename.startsWith(path.join(projectRoot, 'src/content/'));
 				const staticImage =
 					filename.startsWith(path.join(projectRoot, 'static/')) &&

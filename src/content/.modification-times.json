@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"files": {
+		"src/content/404.md": {
+			"hash": "03a89d07534a785700d9d11a51d58973014cd2e5d38798e9885d790621251be2",
+			"modified": 1788858219124.106
+		},
+		"src/content/about.md": {
+			"hash": "18bb597a0c90358deed6d8576ed4bf855ff4ff3b3d919f50d842ad2d90413a8e",
+			"modified": 1788975931335.5105
+		},
+		"src/content/cv.md": {
+			"hash": "c3da92326cd07a64f658d1e09896c22a7e0fc2f5c8b933be7d8ac11613c8a754",
+			"modified": 1788975852649.2297
+		},
+		"src/content/index.md": {
+			"hash": "1a63a8cc46c5db9b8e092836f710f1ca7e777e2396c148cfe59299ee266616b3",
+			"modified": 1788979760144.723
+		},
+		"src/content/photography/index.md": {
+			"hash": "986db37bd51d0c961fd1554747b93489608f005ae944a1a3d63cfeb7e6606bfb",
+			"modified": 1788975394401.1448
+		},
+		"src/content/writing/index.md": {
+			"hash": "154db4c5b8810f14985a6ac1e6c7b2cc34e588f0ef2d8a25979e0f3ca0b1870f",
+			"modified": 1788975845985.8467
+		},
+		"src/content/writing/lubq/index.md": {
+			"hash": "34f555f1551575976ef5993f01c3a1425997cf6e20f9d302a542200c7d0e6158",
+			"modified": 1788971731854.2886
+		},
+		"src/content/writing/lubq/per-producer-ordering.md": {
+			"hash": "01f3fd9ecfe33076b6a004e4200124a8906d7f6b6b7a8344ba1c972f5b2374b0",
+			"modified": 1788971731854.4543
+		},
+		"src/content/writing/photography/index.md": {
+			"hash": "db7151de7dd484ad00217d661b5f00f2728709e3fde9297d61ec6f4352919f05",
+			"modified": 1788974172770.7893
+		},
+		"src/content/writing/photography/worn-with-time.md": {
+			"hash": "1a7f800b3aa8a98139bed3ba6ac55a119da38ca92af24be120d4cc335d1d1549",
+			"modified": 1788874562890.1553
+		},
+		"src/content/writing/ubq-v8/beginning.md": {
+			"hash": "125473f30b56e56dac8fe5971497c9312b5f4aaf7e085e941406886601984c8e",
+			"modified": 1788985418713.329
+		},
+		"src/content/writing/ubq-v8/index.md": {
+			"hash": "01df9fb1ff951ab3565972e699d5f714c59de502216d97733200ec5bdc1aca8a",
+			"modified": 1788984952950.6628
+		},
+		"src/content/writing/ubq/allocation-experiment.md": {
+			"hash": "d131ea205799edc371b835b1edf3292502b73a4b6d1bc417d902cf6bd53c5903",
+			"modified": 1788971731855.8513
+		},
+		"src/content/writing/ubq/head-packing.md": {
+			"hash": "4937201d3f7536b37a42dc7ad5a1abb233be07f1d203f75ec7fded02c0a32fd0",
+			"modified": 1788971833205.5151
+		},
+		"src/content/writing/ubq/index.md": {
+			"hash": "488a2555c6d3c4bd8796c1b250d400b9b6ad8d03d7f2c3e8a8ff4938fd75c95b",
+			"modified": 1788971731855.6736
+		},
+		"src/content/writing/ubq/memory-reuse.md": {
+			"hash": "a184e8b3ebd62efe27c7d6fa1abf8a4c93833dcd108f7cef0f7028c6354f3d11",
+			"modified": 1788971731856.3044
+		},
+		"src/content/writing/ubq/producer-reservations.md": {
+			"hash": "840bd07d40cfdae1bc86c411832fe3dcf3f6df48511a73623661531cc8a3b9ac",
+			"modified": 1788971731855.2104
+		},
+		"src/content/writing/ubq/queue-interface.md": {
+			"hash": "aec28155f73bf27eeb4fe4c6fcc27768627e7cf6db0be5b417dec6549b4297ee",
+			"modified": 1788971833218.8533
+		}
+	}
+}
