@@ -2,7 +2,8 @@
 title: CV
 eyebrow: CV
 headline: My various experiences.
-summary: 'A hub to see the experiences that define my career.'
+summary: A hub to see the experiences that define my career.
+cover: photo-4460a85b4bff
 ---
 
 ## Education

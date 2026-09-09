@@ -11,30 +11,20 @@
 	 * scrolling off. Nothing here moves on its own, so there is no motion to
 	 * withdraw when a visitor has asked for less of it.
 	 *
-	 * The frame is the site's black, and the photograph is contained rather than
-	 * cropped: covers arrive in both orientations, and a band wide enough for a
-	 * landscape photograph would take a portrait one apart.
+	 * Every cover is cropped into the same fixed band rather than sizing one for
+	 * itself, so a page's opening does not change shape with the picture it
+	 * names. That costs the edges of a photograph, and most of a portrait one,
+	 * which is the trade Nicolas chose: a uniform opening at the width of the
+	 * writing, over a frame that fits each photograph exactly.
 	 */
 	let { cover }: { cover: CoverImage } = $props();
 
 	/**
-	 * How wide the photograph will actually be drawn.
-	 *
-	 * A contained photograph is bounded by the band's height as much as by the
-	 * page's width — a landscape cover in a band two thirds of a screen tall is
-	 * drawn at roughly half the width the shell would allow. Asking for the
-	 * shell's width instead would fetch the 2400px variant on a dense display to
-	 * draw about 1500 of them. The terms mirror `--cover-height` and the shell's
-	 * width in `global.css`; a browser that cannot read them ignores the
-	 * attribute and falls back to the full width, which is only the old
-	 * behaviour.
+	 * The band is the width of the writing, so the photograph is drawn at the
+	 * measure and nothing about the picture itself changes that. The same string
+	 * an essay's photographs use, because they now occupy the same column.
 	 */
-	const aspect = $derived(cover.width && cover.height ? cover.width / cover.height : null);
-	const sizes = $derived(
-		aspect
-			? `min(calc(100vw - 2rem), 88rem, calc(62vh * ${aspect.toFixed(4)}), calc(42rem * ${aspect.toFixed(4)}))`
-			: '100vw'
-	);
+	const sizes = '(min-width: 62rem) 60rem, calc(100vw - 2rem)';
 </script>
 
 <div class="page-cover">

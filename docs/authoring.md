@@ -128,6 +128,8 @@ Anything named with `from` is a **path**, looked up in the page tree, so the tit
 
 ### Reference
 
+Use `to="/writing"` on a `<Section title="Writing">` to make the section heading itself a link. Home uses linked headings instead of separate index links.
+
 | Tag                                                 | Purpose                                                                                                                                                                                 |
 | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `<Section title="Writing">`                         | A numbered block. Numbers are generated in order of appearance, so reordering sections renumbers them. `layout="split"` sets the block's prose against its links.                       |
@@ -206,7 +208,13 @@ summary: 'A hub to see all my photographs.'
 cover: photo-2481017f1052
 ```
 
-The photograph is held in a band under the site header, and the writing scrolls up over it on the site's black: a visitor gets the header, then the photograph, then the page. Nothing moves on its own, so there is nothing to withdraw under `prefers-reduced-motion`. The band takes its height from the photograph, capped at roughly two thirds of the first screen, and the photograph is contained rather than cropped — a portrait cover reads as a tall picture in a wide band rather than being cut down to fit.
+The photograph is held in a band under the site header, and the writing scrolls up over it on the site's black: a visitor gets the header, then the photograph, then the page. Nothing moves on its own, so there is nothing to withdraw under `prefers-reduced-motion`.
+
+The band is the width of the writing, and every cover is cropped into it, so a page's opening does not change shape with the picture it names. Its height is whatever the header and an opening's worth of writing leave on the first screen, up to 4:3 — which is the shape these photographs are taken in, so on a roomy screen a landscape cover is barely cropped at all and carries its provenance mark whole. A shorter window crops further rather than pushing the band past the fold.
+
+The crop is even on both edges, so a cover keeps the middle of its photograph. Choose one for what its middle says, and expect a portrait cover to give up a great deal — and, with the top and bottom of the frame gone, to carry a partial provenance mark or none. The same photograph still carries a whole one wherever it is shown at its own shape.
+
+A page with a cover also opens tighter than one without. The shell's usual gap above the heading is there to set a bare page down from the header; a cover has already done that, so it shrinks, and the heading arrives at four fifths of its size and grows to full over the band's height. That last part is decoration and behaves like it: no scroll-driven animation, or `prefers-reduced-motion`, and the heading is simply full size from the start.
 
 A cover is served from the same responsive variants as the gallery, provenance mark included, so it needs no separate asset and nothing new is published about it.
 

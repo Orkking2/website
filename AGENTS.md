@@ -139,13 +139,12 @@ About experience → CV → Relevant writing
 
 ### Home
 
-The homepage should orient visitors rather than reproduce every page. Current hierarchy:
+The homepage should orient visitors rather than reproduce every page. Nicolas chose a clean, text-only index on 2026-09-09, with proportionate headings and compact sections. Section titles link directly to their destinations instead of repeating separate “Index” links. Current hierarchy:
 
-1. a short introduction of roughly two or three sentences;
-2. featured research or projects, with UBQ prominent;
-3. recent or featured writing;
-4. selected photography in a visually distinct preview;
-5. a short About/Contact path.
+1. a short introduction;
+2. Writing and its collection list;
+3. a brief Photography description;
+4. compact About Me and CV links as section headings.
 
 Do not make a full-screen photograph the site's only identity. Do not add a giant hero animation, novelty cursor, intro gate, or other attention-heavy portfolio convention without Nicolas's approval.
 

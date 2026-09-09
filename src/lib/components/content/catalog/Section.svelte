@@ -10,9 +10,10 @@
 	 */
 	let {
 		title,
+		to,
 		layout = 'stack',
 		children
-	}: { title: string; layout?: 'stack' | 'split'; children?: Snippet } = $props();
+	}: { title: string; to?: string; layout?: 'stack' | 'split'; children?: Snippet } = $props();
 	const headingId = $derived(
 		`index-${title
 			.toLowerCase()
@@ -23,7 +24,9 @@
 
 <section class="index-block" aria-labelledby={headingId}>
 	<header class="index-block__heading">
-		<h2 id={headingId}>{title}</h2>
+		<h2 id={headingId}>
+			{#if to}<a href={to}>{title}</a>{:else}{title}{/if}
+		</h2>
 	</header>
 	{#if layout === 'split'}
 		<div class="index-block__split">{@render children?.()}</div>

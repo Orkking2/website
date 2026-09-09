@@ -2,7 +2,7 @@
 title: Writing
 eyebrow: Writing
 headline: My various writings
-summary: 'My writing on projects and photographs.'
+summary: My writing on projects and photographs.
 cover: photo-6267fdbfc568
 ---
 

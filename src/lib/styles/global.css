@@ -25,16 +25,32 @@
 	--line: var(--rule);
 	--line-strong: var(--rule-strong);
 	--max-width: 88rem;
-	--measure: 44rem;
+	/* One content width. Prose, figures, photographs, lists and a page's opening
+	 * photograph are all set to it, so a page reads as one column rather than as
+	 * a narrow one with wider things interrupting it. */
+	--measure: 60rem;
 	/* The header overlays whatever is beneath it, so anything that has to clear it
 	 * needs its height as a number. It is set here and consumed by the header
 	 * itself, so the two cannot drift apart. */
-	--header-height: 4.5rem;
-	/* How much of the first screen a page's cover photograph takes. Short of the
-	 * whole of it, deliberately: the writing below should be visible enough to
-	 * say that there is more here than a picture. */
-	--cover-height: min(62vh, 42rem);
-	--cover-height: min(62svh, 42rem);
+	--header-height: 3rem;
+	/* How much of the first screen a page's cover photograph takes: whatever the
+	 * header and an opening's worth of writing leave it. Stating it as what is
+	 * left over is the point — a fixed height would hand anything saved above it
+	 * to the text rather than to the photograph, which is how the band stayed the
+	 * same size when the header shrank. The 8rem is the eyebrow and the heading,
+	 * so a visitor can always see what the page is called; the upper bound is the
+	 * band's own 4:3 at the full measure, so a tall window does not stretch the
+	 * band past the shape of the photographs in it. */
+	--cover-height: clamp(
+		12rem,
+		calc(100vh - var(--header-height) - 8rem),
+		calc(var(--measure) * 0.75)
+	);
+	--cover-height: clamp(
+		12rem,
+		calc(100svh - var(--header-height) - 8rem),
+		calc(var(--measure) * 0.75)
+	);
 }
 
 * {
@@ -216,34 +232,43 @@ main {
  * at the header's height rather than at the top of the viewport, because the
  * header is sticky and so still occupies its place in the flow: resting at zero
  * would slide the photograph under the bar as soon as the page moved. And the
- * photograph is contained, not cropped: covers come in both orientations, and
- * cropping a portrait photograph to a landscape band would throw most of it
- * away. The black around it is the page's own background, so a narrow
- * photograph reads as a photograph in a band rather than as a short one.
+ * band is one fixed shape that every cover is cropped into, rather than a frame
+ * each photograph sizes for itself: letting the photograph decide made a page's
+ * opening depend on which picture it happened to name, and stood a portrait
+ * cover up as a small tile in a wide black field. The crop is even on both
+ * edges, so a cover holds the middle of its photograph; the provenance mark
+ * rides at the top of the frame and is cut with it. A cover is the width of the
+ * writing it introduces, so the two share an edge, and `--cover-height` keeps
+ * the whole of it on the first screen — a cover is never something to scroll
+ * through before reaching the page.
  */
 .page-cover {
 	position: sticky;
 	top: var(--header-height);
 	z-index: 0;
-	display: flex;
-	justify-content: center;
+	width: min(calc(100% - 2rem), var(--max-width));
+	margin-inline: auto;
 	background: var(--background);
 }
 
 .page-cover picture {
-	display: flex;
-	width: min(calc(100% - 2rem), var(--max-width));
-	justify-content: center;
+	display: block;
+	width: 100%;
+	max-width: var(--measure);
+	/* Definite width, so capping the height crops further into the photograph
+	 * rather than narrowing the band. 4:3 is the shape the camera these were
+	 * taken on records, so a landscape cover is cropped barely at all and it is
+	 * the portraits that give. */
+	aspect-ratio: 4 / 3;
+	max-height: var(--cover-height);
+	margin-inline: auto;
+	overflow: clip;
 }
 
-/* The band takes its height from the photograph rather than the other way round,
- * so a wide photograph on a narrow screen is a short band instead of a tall one
- * with the picture stranded in the middle of it. --cover-height is the ceiling. */
 .page-cover img {
-	width: auto;
-	height: auto;
-	max-width: 100%;
-	max-height: var(--cover-height);
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
 .page-shell {
@@ -256,6 +281,46 @@ main {
 	position: relative;
 	z-index: 1;
 	background: var(--background);
+	/* The shell's usual opening is there to set a bare page down from the header
+	 * rather than against it. A cover has already done that, and at more than
+	 * enough length, so keeping the full measure of it here would only spend the
+	 * first screen on black. What is left is the gap between the photograph and
+	 * the writing it introduces. */
+	padding-top: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+/*
+ * On a covered page the headline arrives at size rather than starting there.
+ *
+ * It is scaled, not resized, so the line keeps the height it will end at and
+ * nothing below it moves while it grows — a headline that reflowed as you
+ * scrolled would drag the whole page with it. The scroll timeline runs over the
+ * band's own height, so a cover cropped short on a short viewport brings the
+ * headline up to full size just as quickly, and by the time the photograph is
+ * covered the growing is over.
+ *
+ * A browser without scroll-driven animation, or a visitor who has asked for
+ * less motion, gets the headline at full size from the start: the effect is the
+ * page's manner, never the way it says anything.
+ */
+@keyframes cover-headline {
+	from {
+		transform: scale(0.78);
+	}
+	to {
+		transform: scale(1);
+	}
+}
+
+@supports (animation-timeline: scroll()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.page-shell--covered .page-intro h1 {
+			transform-origin: 0 0;
+			animation: cover-headline linear both;
+			animation-timeline: scroll(root block);
+			animation-range: 0 var(--cover-height);
+		}
+	}
 }
 
 .hero {
@@ -1094,13 +1159,13 @@ html[data-photo-focus] .gallery-grid__frame {
 @media (max-width: 58rem) {
 	:root {
 		/* The name and the navigation stack, so the bar is two rows tall here. */
-		--header-height: 7.25rem;
+		--header-height: 6rem;
 	}
 
 	.site-header__inner {
 		grid-template-columns: 1fr;
-		gap: 0.75rem;
-		padding-block: 1rem;
+		gap: 0.5rem;
+		padding-block: 0.5rem;
 	}
 
 	.site-header nav ul {
@@ -1154,6 +1219,7 @@ html[data-photo-focus] .gallery-grid__frame {
 @media (max-width: 42rem) {
 	.site-header__inner,
 	.site-footer__inner,
+	.page-cover,
 	.page-shell {
 		width: min(calc(100% - 1.25rem), var(--max-width));
 	}
@@ -1254,16 +1320,14 @@ html[data-photo-focus] .gallery-grid__frame {
 
 /* Phase 1 identity prototype: homepage index */
 .home-index {
-	padding-top: clamp(2.5rem, 5vw, 4.75rem);
+	max-width: var(--measure);
+	padding-block: clamp(2rem, 4vw, 3rem);
 	/* One scope for the authored sections, which number themselves in document order. */
 	counter-reset: index-section;
 }
 
 .home-index__intro {
-	display: grid;
-	grid-template-columns: minmax(8rem, 0.36fr) minmax(0, 1.64fr);
-	column-gap: clamp(2rem, 6vw, 7rem);
-	padding-bottom: clamp(3rem, 7vw, 6.5rem);
+	padding-bottom: 2rem;
 }
 
 .index-label,
@@ -1281,18 +1345,18 @@ html[data-photo-focus] .gallery-grid__frame {
 
 .home-index__intro h1 {
 	max-width: 17ch;
-	margin-bottom: 1.4rem;
-	font-size: clamp(2.65rem, 6vw, 5.4rem);
+	margin-block: 0.5rem 0.75rem;
+	font-size: clamp(2.25rem, 4vw, 3.25rem);
 	font-weight: 400;
 	letter-spacing: -0.045em;
-	line-height: 0.96;
+	line-height: 1.1;
 }
 
 .home-index__intro > p:last-child {
 	max-width: 40rem;
 	margin: 0;
 	color: var(--text-secondary);
-	font-size: clamp(1.04rem, 1.4vw, 1.2rem);
+	font-size: 1.125rem;
 	line-height: 1.58;
 }
 
@@ -1520,10 +1584,6 @@ html[data-photo-focus] .gallery-grid__frame {
 }
 
 @media (max-width: 42rem) {
-	.home-index__intro h1 {
-		font-size: clamp(2.65rem, 14vw, 4.25rem);
-	}
-
 	.index-block__heading {
 		grid-template-columns: 2.5rem minmax(0, 1fr);
 	}
@@ -1552,6 +1612,65 @@ html[data-photo-focus] .gallery-grid__frame {
 		padding-left: 0;
 		border-top: 1px solid var(--rule-strong);
 	}
+}
+
+/* Home is a compact directory; article and collection lists keep their own spacing. */
+.home-index .index-label {
+	margin: 0;
+}
+
+.home-index .index-block {
+	padding-bottom: 1.75rem;
+}
+
+.home-index .index-block__heading {
+	grid-template-columns: 2rem minmax(0, 1fr);
+	gap: 0.75rem;
+	padding-block: 1rem 0.75rem;
+	border-bottom: 0;
+}
+
+.home-index .index-block__heading h2 {
+	font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+	line-height: 1.25;
+}
+
+.home-index .index-block__heading a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 2.75rem;
+	color: var(--text);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 0.2em;
+}
+
+.home-index .index-block__heading a:hover,
+.home-index .index-block__heading a:focus-visible {
+	color: var(--interaction);
+}
+
+.home-index .working-index {
+	margin: 0 0 0 2.75rem;
+}
+
+.home-index .working-index li {
+	padding-block: 0.75rem;
+}
+
+.home-index .working-index li:last-child {
+	border-bottom: 0;
+}
+
+.home-index section.index-block > p:first-of-type {
+	max-width: 40rem;
+	margin: 0 0 0 2.75rem;
+	padding-top: 0;
+	font-size: 1.125rem;
+}
+
+.home-index .index-columns .index-block {
+	display: block;
+	padding-bottom: 0;
 }
 
 /* Phase 1 identity prototypes: article, annotations, and photography */
@@ -2199,17 +2318,13 @@ html[data-photo-focus] .gallery-grid__frame {
 
 .page-intro > :where(h1, p) {
 	width: 100%;
-	max-width: 60rem;
+	max-width: var(--measure);
 	margin-inline: auto;
 }
 
 .page-intro h1 {
-	max-width: 60rem;
+	max-width: var(--measure);
 	font-size: clamp(2.5rem, 5vw, 4.75rem);
-}
-
-.article-reading {
-	--reading-measure: 60rem;
 }
 
 .article-flow {
@@ -2220,7 +2335,7 @@ html[data-photo-focus] .gallery-grid__frame {
 
 .article-flow > :where(p, h2, h3, h4, blockquote, pre, table, ul, ol):not(.working-index) {
 	width: 100%;
-	max-width: var(--reading-measure);
+	max-width: var(--measure);
 	margin-inline: auto;
 }
 
@@ -2229,7 +2344,7 @@ html[data-photo-focus] .gallery-grid__frame {
 }
 
 .article-flow--annotated {
-	grid-template-columns: minmax(0, var(--reading-measure)) minmax(14rem, 19rem);
+	grid-template-columns: minmax(0, var(--measure)) minmax(14rem, 19rem);
 	column-gap: 2.5rem;
 	justify-content: center;
 }
@@ -2249,7 +2364,7 @@ html[data-photo-focus] .gallery-grid__frame {
 .related-content,
 .collection-reading,
 .page-shell > .resource-list {
-	max-width: 60rem;
+	max-width: var(--measure);
 	margin-inline: auto;
 }
 
@@ -2270,7 +2385,7 @@ html[data-photo-focus] .gallery-grid__frame {
 
 .writing-collection > p {
 	color: var(--text-secondary);
-	max-width: 60rem;
+	max-width: var(--measure);
 }
 
 .working-index a[aria-current='page'] {
@@ -2313,7 +2428,7 @@ html[data-photo-focus] .gallery-grid__frame {
  */
 .essay-photo {
 	width: 100%;
-	max-width: var(--reading-measure, 60rem);
+	max-width: var(--measure);
 	margin-inline: auto;
 	margin-block: clamp(2rem, 6vw, 3.5rem);
 }
