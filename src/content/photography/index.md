@@ -3,6 +3,7 @@ title: Photography
 eyebrow: Photography
 headline: My various photographs.
 summary: 'A hub to see all my photographs.'
+cover: photo-fa16597092e6
 ---
 
 <section class="photo-essay-preview" aria-labelledby="essays-heading">

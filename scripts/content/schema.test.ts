@@ -93,6 +93,15 @@ test('a page without its own photographs takes an image path as its cover', () =
 	assert.throws(() => parseMetadata({ ...article, cover: 'tombstone' }, 'f.md'), /cover/);
 });
 
+test('a page without its own photographs names one from the library by ID', () => {
+	assert.equal(
+		parseMetadata({ ...article, cover: 'photo-3b949334809c' }, 'f.md').cover,
+		'photo-3b949334809c'
+	);
+	// A local name is an essay's to give, so it means nothing on a page without images.
+	assert.throws(() => parseMetadata({ ...article, cover: 'steps' }, 'f.md'), /library ID/);
+});
+
 test('two names may share a title but not the same photograph', () => {
 	assert.throws(
 		() => parseMetadata({ ...essay, images: { one: 'photo-abc123', two: 'photo-abc123' } }, 'e.md'),

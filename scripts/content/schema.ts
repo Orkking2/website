@@ -4,6 +4,13 @@ export const slugSchema = z
 	.string()
 	.regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a lowercase hyphenated slug.');
 /**
+ * A photograph as the library identifies it, which is how a page names one it
+ * does not own. The prefix is what separates it from an essay's own local name.
+ */
+export const photoIdSchema = z
+	.string()
+	.regex(/^photo-[a-z0-9]+$/, 'Name a photograph by its library ID, as "photo-3b949334809c".');
+/**
  * A name an essay gives one of its own photographs.
  *
  * It has to start with a letter so the order you write the images in is the order
@@ -101,7 +108,11 @@ export const pageSchema = z.strictObject({
 	// page, so two photographs may share a title and still be addressed separately.
 	// Keys are checked in parseMetadata so a bad name reports itself, not "invalid key".
 	images: z.record(z.string(), slugSchema).optional(),
-	/** One of this page's own photographs, or an image path for a page without them. */
+	/**
+	 * The photograph this page opens with: one of its own by name, or any
+	 * photograph in the library by ID. A bare /images/ path is also accepted,
+	 * for a picture the library does not hold.
+	 */
 	cover: z.string().nullable().optional()
 });
 
@@ -151,11 +162,12 @@ export function parseMetadata(raw: unknown, file: string): PageMetadata {
 		if (new Set(ids).size !== ids.length)
 			throw new Error(`${file} → images: Give each photograph one name on this page.`);
 	} else if (entry.cover) {
-		// Without its own photographs, a cover can only be a built image path.
-		const cover = imagePath.safeParse(entry.cover);
+		// Without photographs of its own, a page has no local names to draw on, so its
+		// cover names a photograph in the library instead — or, failing that, a file.
+		const cover = z.union([photoIdSchema, imagePath]).safeParse(entry.cover);
 		if (!cover.success)
 			throw new Error(
-				`${file} → cover: Name one of this page's own photographs, or give an /images/ path.`
+				`${file} → cover: Name a photograph by its library ID, as "photo-3b949334809c", or give an /images/ path.`
 			);
 	}
 	return entry;
@@ -303,6 +315,25 @@ export interface GalleryImage {
 /** A photograph as one essay refers to it: its own name, plus the image itself. */
 export type EssayImage = GalleryImage & { alias: string; placed: boolean };
 
+/**
+ * The photograph a page opens with, resolved.
+ *
+ * A cover named from the library carries the same responsive variants the
+ * gallery serves, so the shell can hand the browser a choice of widths rather
+ * than one fixed file. A cover given as a bare path carries none of that and is
+ * served as it is, which is why every derived field here is nullable: the two
+ * forms differ in what is known about them, not in how they are placed.
+ */
+export interface CoverImage {
+	src: string;
+	alt: string;
+	title: string | null;
+	width: number | null;
+	height: number | null;
+	srcset: string | null;
+	webpSrcset: string | null;
+}
+
 export interface FigureImage {
 	src: string;
 	width: number;
@@ -330,7 +361,7 @@ export interface CatalogPage extends Omit<PageMetadata, 'images' | 'cover'> {
 	children: string[];
 	images: EssayImage[];
 	figures: Record<string, FigureImage>;
-	cover: string | null;
+	cover: CoverImage | null;
 	/**
 	 * Whether this page shows photographs, so the shell knows to carry the viewer.
 	 *

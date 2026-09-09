@@ -1,7 +1,12 @@
 import catalog from './.generated/catalog.json';
 import { site } from '$lib/data/site';
 import type { CatalogPage, GalleryImage } from '../../../scripts/content/schema';
-export type { CatalogPage, EssayImage, GalleryImage } from '../../../scripts/content/schema';
+export type {
+	CatalogPage,
+	CoverImage,
+	EssayImage,
+	GalleryImage
+} from '../../../scripts/content/schema';
 export { dealIntoColumns } from '../../../scripts/content/schema';
 
 export const pages = catalog.pages as CatalogPage[];

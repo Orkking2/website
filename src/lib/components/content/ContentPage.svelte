@@ -4,6 +4,7 @@
 	import ArticleBody from './ArticleBody.svelte';
 	import ContentBody from './ContentBody.svelte';
 	import EssayPhoto from './EssayPhoto.svelte';
+	import PageCover from './PageCover.svelte';
 	import PhotoViewer from './PhotoViewer.svelte';
 	import Entries from './catalog/Entries.svelte';
 	import { findPage, type CatalogPage } from '$lib/content/catalog';
@@ -36,6 +37,18 @@
 		demo: 'Demo'
 	};
 	const related = $derived(page.related.map(findPage).filter((entry) => entry !== undefined));
+	/**
+	 * A page opens with its cover photograph unless it shows that photograph anyway.
+	 *
+	 * An essay names one of its own images as its cover, and those images are all
+	 * on the page already — placed where the writing wanted them, or closing it.
+	 * Opening with one as well would print it twice. So in practice the band
+	 * belongs to a page that names a photograph it does not otherwise show, which
+	 * is what an index does.
+	 */
+	const cover = $derived(
+		page.cover && !page.images.some((image) => image.src === page.cover?.src) ? page.cover : null
+	);
 </script>
 
 <PageMeta
@@ -96,8 +109,12 @@
 
 {#if page.viewer}<PhotoViewer />{/if}
 
+<!-- The cover is a sibling of the shell, not a child of it, because it stays put
+     while the shell scrolls over it: the two have to be able to overlap. -->
+{#if cover}<PageCover {cover} />{/if}
+
 {#if page.layout === 'home'}
-	<div class="page-shell home-index" data-identity-prototype>
+	<div class="page-shell home-index" class:page-shell--covered={cover} data-identity-prototype>
 		<header class="home-index__intro">
 			{#if eyebrow}<p class="index-label">{eyebrow}</p>{/if}
 			<h1>{heading}</h1>
@@ -107,7 +124,7 @@
 		{@render trailing()}
 	</div>
 {:else}
-	<article class="page-shell">
+	<article class="page-shell" class:page-shell--covered={cover}>
 		<header class="page-intro">{@render intro()}</header>
 		<ArticleBody route={page.route} annotations={page.annotations} />
 		{@render trailing()}

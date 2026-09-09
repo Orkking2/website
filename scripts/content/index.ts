@@ -210,6 +210,10 @@ export async function readContent(root = projectRoot, { strict = true } = {}) {
 				path.join(root, 'static'),
 				path.join(root, 'static', metadata.cover)
 			);
+		} else if (metadata.cover && !isEssay(metadata) && !photoIds.has(metadata.cover)) {
+			// An essay's cover names one of its own images and is checked by completeness;
+			// any other page names the library directly, so the ID has to be a real one.
+			throw new Error(`${file} → cover: Unknown photo ID "${metadata.cover}".`);
 		}
 	}
 

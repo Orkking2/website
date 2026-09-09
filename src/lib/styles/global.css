@@ -26,6 +26,15 @@
 	--line-strong: var(--rule-strong);
 	--max-width: 88rem;
 	--measure: 44rem;
+	/* The header overlays whatever is beneath it, so anything that has to clear it
+	 * needs its height as a number. It is set here and consumed by the header
+	 * itself, so the two cannot drift apart. */
+	--header-height: 4.5rem;
+	/* How much of the first screen a page's cover photograph takes. Short of the
+	 * whole of it, deliberately: the writing below should be visible enough to
+	 * say that there is more here than a picture. */
+	--cover-height: min(62vh, 42rem);
+	--cover-height: min(62svh, 42rem);
 }
 
 * {
@@ -115,7 +124,7 @@ a:focus-visible {
 	grid-template-columns: minmax(9rem, 1fr) auto;
 	align-items: center;
 	gap: 2.5rem;
-	min-height: 4.5rem;
+	min-height: var(--header-height);
 }
 
 .site-name {
@@ -194,8 +203,59 @@ main {
 	display: block;
 }
 
+/*
+ * A page's opening photograph, which the writing scrolls over.
+ *
+ * The band holds still — it is stuck directly under the header for as long as
+ * the page lasts — and the shell below it is opaque and stacked above it, so
+ * scrolling does not move the photograph away so much as draw the page up over
+ * it. Landing on the page gives the header, then the photograph, then the
+ * beginning of the writing.
+ *
+ * Two consequences of that arrangement are worth naming. The band comes to rest
+ * at the header's height rather than at the top of the viewport, because the
+ * header is sticky and so still occupies its place in the flow: resting at zero
+ * would slide the photograph under the bar as soon as the page moved. And the
+ * photograph is contained, not cropped: covers come in both orientations, and
+ * cropping a portrait photograph to a landscape band would throw most of it
+ * away. The black around it is the page's own background, so a narrow
+ * photograph reads as a photograph in a band rather than as a short one.
+ */
+.page-cover {
+	position: sticky;
+	top: var(--header-height);
+	z-index: 0;
+	display: flex;
+	justify-content: center;
+	background: var(--background);
+}
+
+.page-cover picture {
+	display: flex;
+	width: min(calc(100% - 2rem), var(--max-width));
+	justify-content: center;
+}
+
+/* The band takes its height from the photograph rather than the other way round,
+ * so a wide photograph on a narrow screen is a short band instead of a tall one
+ * with the picture stranded in the middle of it. --cover-height is the ceiling. */
+.page-cover img {
+	width: auto;
+	height: auto;
+	max-width: 100%;
+	max-height: var(--cover-height);
+}
+
 .page-shell {
 	padding-block: clamp(2.75rem, 6vw, 6rem);
+}
+
+/* What makes the cover a thing the page passes over rather than a background:
+ * the shell is raised above it and carries the site's black with it. */
+.page-shell--covered {
+	position: relative;
+	z-index: 1;
+	background: var(--background);
 }
 
 .hero {
@@ -1032,6 +1092,11 @@ html[data-photo-focus] .gallery-grid__frame {
 }
 
 @media (max-width: 58rem) {
+	:root {
+		/* The name and the navigation stack, so the bar is two rows tall here. */
+		--header-height: 7.25rem;
+	}
+
 	.site-header__inner {
 		grid-template-columns: 1fr;
 		gap: 0.75rem;

@@ -67,7 +67,8 @@ Everything else is a facet you add when the page needs it. **A key you leave out
 | `links`                      | `paper`, `code`, `docs`, `demo` — rendered as a resource list under the body.                                                                                    |
 | `related`                    | Other pages this one develops, named by path: `['/writing/ubq']`.                                                                                                |
 | `annotations`                | Turns on the article annotation rail.                                                                                                                            |
-| `images`, `cover`            | Makes the page a photo essay. See below.                                                                                                                         |
+| `images`                     | Makes the page a photo essay. See below.                                                                                                                         |
+| `cover`                      | The photograph the page opens with. See below.                                                                                                                   |
 | `location`, `inProgress`     | Where a photograph was made, and whether the page announces itself as unfinished.                                                                                |
 
 ## Footnotes
@@ -194,6 +195,24 @@ A placed photograph takes the same width as the writing around it, so the column
 `npm run photos` edits the same list, and is the intended way to import a photograph into an essay, name it, reorder, and choose the cover. It writes all of that back into this frontmatter. Renaming there also rewrites `<Photo of="…">` and `#name` links in the body, so a rename cannot quietly break the page.
 
 This map is the **only** record of which photographs an essay holds. A photograph's own file says nothing about which essay it belongs to; that direction is worked out by reading the essays, so there is one place to change and nothing to keep in step.
+
+### A page can open with a photograph
+
+`cover` names the photograph a page opens with. A page without photographs of its own names one from the library by its ID:
+
+```yaml
+title: Photography
+summary: 'A hub to see all my photographs.'
+cover: photo-2481017f1052
+```
+
+The photograph is held in a band under the site header, and the writing scrolls up over it on the site's black: a visitor gets the header, then the photograph, then the page. Nothing moves on its own, so there is nothing to withdraw under `prefers-reduced-motion`. The band takes its height from the photograph, capped at roughly two thirds of the first screen, and the photograph is contained rather than cropped — a portrait cover reads as a tall picture in a wide band rather than being cut down to fit.
+
+A cover is served from the same responsive variants as the gallery, provenance mark included, so it needs no separate asset and nothing new is published about it.
+
+An essay's `cover` still names one of the essay's own photographs, and there it does not produce a band: those photographs are on the page already, placed where the writing wanted them or closing it, and a page should not print the same photograph twice. So in practice the band belongs to a page that names a photograph it does not otherwise show, which is what an index does.
+
+Unfinished photographs are skipped here as everywhere else: a cover naming a photograph that is not yet reviewed leaves the page without a band rather than failing the build. Naming an ID the library does not hold _is_ an error, because that is a mistake rather than work in progress.
 
 ### Layout rules
 

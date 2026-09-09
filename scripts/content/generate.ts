@@ -4,12 +4,52 @@ import { comparePages, readContent, projectRoot, fileExists, type PageNode } fro
 import { buildVariants } from '../photos/variants.ts';
 import { findTags } from './components.ts';
 import { buildFigures } from './figures.ts';
-import { isEssay, type CatalogPage } from './schema.ts';
+import { isEssay, type CatalogPage, type CoverImage, type GalleryImage } from './schema.ts';
 import type { Plugin } from 'vite';
 
 async function writeChanged(file: string, text: string) {
 	if (!(await fileExists(file)) || (await readFile(file, 'utf8')) !== text)
 		await writeFile(file, text);
+}
+
+/**
+ * The photograph a page opens with, resolved to something the shell can place.
+ *
+ * A page that owns photographs names one of them; any other page names one from
+ * the library by ID. Either way the answer is the same image the gallery would
+ * serve, variants included. A cover naming a photograph that is not finished
+ * resolves to nothing, on the same terms as the rest of the library: an
+ * unreviewed photograph is left out of the build rather than failing it.
+ */
+function resolveCover(
+	cover: string | null | undefined,
+	named: Record<string, string> | undefined,
+	imageById: Map<string, GalleryImage>
+): CoverImage | null {
+	if (!cover) return null;
+	const image = imageById.get(named?.[cover] ?? cover);
+	if (image)
+		return {
+			src: image.src,
+			alt: image.decorative ? '' : image.alt,
+			title: image.title,
+			width: image.width,
+			height: image.height,
+			srcset: image.srcset,
+			webpSrcset: image.webpSrcset
+		};
+	// A path the library does not hold is a file, and nothing more is known about it.
+	if (cover.startsWith('/images/'))
+		return {
+			src: cover,
+			alt: '',
+			title: null,
+			width: null,
+			height: null,
+			srcset: null,
+			webpSrcset: null
+		};
+	return null;
 }
 
 /** The header lists top-level pages unless a page opts out; deeper pages never appear. */
@@ -52,7 +92,7 @@ export async function generateContent({ strict = true } = {}) {
 						placed: placed.has(alias)
 					}))
 				: [],
-			cover: essay ? (cover ? (imageById.get(named![cover])?.src ?? null) : null) : (cover ?? null),
+			cover: resolveCover(cover, essay ? named : undefined, imageById),
 			// Either the page names photographs of its own, or it places the gallery.
 			viewer: essay || findTags(page.body, ['PhotoGrid']).length > 0
 		};
