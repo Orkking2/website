@@ -190,6 +190,7 @@ test('a tag is located with its attributes and its line', () => {
 	const [entries, entry] = findTags(body, ['Entries', 'Entry']);
 	assert.deepEqual(entries, {
 		name: 'Entries',
+		expressions: [],
 		attributes: { from: 'writing', limit: '3' },
 		line: 3
 	});

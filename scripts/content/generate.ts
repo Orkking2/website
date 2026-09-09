@@ -3,6 +3,7 @@ import path from 'node:path';
 import { comparePages, readContent, projectRoot, fileExists, type PageNode } from './index.ts';
 import { buildVariants } from '../photos/variants.ts';
 import { findTags } from './components.ts';
+import { buildFigures } from './figures.ts';
 import { isEssay, type CatalogPage } from './schema.ts';
 import type { Plugin } from 'vite';
 
@@ -19,6 +20,7 @@ function inNavigation(page: PageNode) {
 export async function generateContent({ strict = true } = {}) {
 	const { pages, photos, photoEssays } = await readContent(projectRoot, { strict });
 	const images = await buildVariants(photos, projectRoot, photoEssays);
+	const figures = await buildFigures(pages, projectRoot);
 	const imageById = new Map(images.map((image) => [image.id, image]));
 	const output = path.join(projectRoot, 'src/lib/content/.generated');
 	await mkdir(output, { recursive: true });
@@ -35,6 +37,7 @@ export async function generateContent({ strict = true } = {}) {
 		const essay = isEssay(page.metadata);
 		return {
 			...metadata,
+			figures: figures.get(page.route)!,
 			route: page.route,
 			parent: page.parent,
 			name: page.name,
@@ -84,9 +87,16 @@ export function contentWatchPlugin(): Plugin {
 	return {
 		name: 'nebve-content',
 		configureServer(server) {
-			server.watcher.add(path.join(projectRoot, 'src/content'));
+			server.watcher.add([path.join(projectRoot, 'src/content'), path.join(projectRoot, 'static')]);
 			const update = (filename: string) => {
-				if (!filename.startsWith(path.join(projectRoot, 'src/content/'))) return;
+				const authored = filename.startsWith(path.join(projectRoot, 'src/content/'));
+				const staticImage =
+					filename.startsWith(path.join(projectRoot, 'static/')) &&
+					/\.(svg|png|jpe?g|webp)$/i.test(filename);
+				const generatedImage = ['photography', 'figures'].some((name) =>
+					filename.startsWith(path.join(projectRoot, `static/images/${name}/`))
+				);
+				if ((!authored && !staticImage) || generatedImage) return;
 				pending = pending.then(async () => {
 					try {
 						await generateContent({ strict: false });

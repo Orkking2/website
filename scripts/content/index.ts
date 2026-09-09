@@ -1,7 +1,10 @@
-import { access, readFile, readdir, realpath, stat } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+import { assertContainedFile } from './files.ts';
+export { assertContainedFile, fileExists } from './files.ts';
 import path from 'node:path';
 import { parseDocument } from 'yaml';
 import { embeddingComponents, findTags } from './components.ts';
+import { readFigures, type FigureSource } from './figures.ts';
 import {
 	completenessIssues,
 	isEssay,
@@ -39,6 +42,7 @@ export interface PageNode {
 	/** Lines the frontmatter occupies, so a body position can be reported against the file. */
 	bodyOffset: number;
 	metadata: PageMetadata;
+	figures: Record<string, FigureSource>;
 }
 
 const authored = /\.(md|svx)$/;
@@ -58,19 +62,6 @@ export function readFrontmatter(source: string, file: string) {
 		body: source.slice(match[0].length),
 		bodyOffset: match[0].split('\n').length - 1
 	};
-}
-
-export async function assertContainedFile(root: string, filename: string) {
-	let actual: string;
-	try {
-		actual = await realpath(filename);
-	} catch {
-		throw new Error(`${filename}: Referenced file does not exist.`);
-	}
-	const relative = path.relative(await realpath(root), actual);
-	if (relative.startsWith('..') || path.isAbsolute(relative) || !(await stat(actual)).isFile()) {
-		throw new Error(`${filename}: Expected a regular file inside ${root}.`);
-	}
 }
 
 /** The path a file at these segments is served at. */
@@ -108,6 +99,7 @@ async function walk(root: string, segments: string[], pages: PageNode[]) {
 		} = readFrontmatter(await readFile(path.join(root, file), 'utf8'), file);
 		const route = routeOf(pageSegments);
 		pages.push({
+			figures: await readFigures(root, { file, body, bodyOffset }),
 			route,
 			parent: isIndex ? (segments.length ? routeOf(segments.slice(0, -1)) : null) : here,
 			name: pageSegments.at(-1) ?? '',
@@ -299,13 +291,4 @@ export async function readContent(root = projectRoot, { strict = true } = {}) {
 		console.warn(report);
 	}
 	return { pages, byRoute, photos, photoEssays, incomplete };
-}
-
-export async function fileExists(file: string) {
-	try {
-		await access(file);
-		return true;
-	} catch {
-		return false;
-	}
 }

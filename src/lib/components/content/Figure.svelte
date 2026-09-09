@@ -1,11 +1,14 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
+	import type { CatalogPage } from '$lib/content/catalog';
 	let {
 		src,
 		alt,
 		caption,
 		width,
 		height,
-		pdf
+		pdf,
+		sizes = 'calc(100vw - 2rem)'
 	}: {
 		src: string;
 		alt: string;
@@ -13,11 +16,26 @@
 		width?: number;
 		height?: number;
 		pdf?: string;
+		sizes?: string;
 	} = $props();
+	const page = getContext<(() => CatalogPage) | undefined>('nebve:essay');
+	const image = $derived(page?.().figures[src]);
 </script>
 
 <figure class="content-figure">
-	<img {src} {alt} {width} {height} loading="lazy" decoding="async" />
+	<picture>
+		{#if image?.webpSrcset}<source type="image/webp" srcset={image.webpSrcset} {sizes} />{/if}
+		<img
+			src={image?.src ?? src}
+			srcset={image?.srcset}
+			sizes={image?.srcset ? sizes : undefined}
+			{alt}
+			width={image?.width ?? width}
+			height={image?.height ?? height}
+			loading="lazy"
+			decoding="async"
+		/>
+	</picture>
 	{#if caption || pdf}
 		<figcaption>
 			{#if caption}<span>{caption}</span>{/if}

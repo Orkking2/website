@@ -10,6 +10,7 @@ node_modules
 /src/lib/content/.generated/
 # Built from reviewed publication masters; never copy originals here.
 /static/images/photography/
+/static/images/figures/
 
 # Private photography intake workspace
 /.local/

@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
+import { inspectImage, variantSettings, variantWidths } from './image.ts';
+export { inspectImage, variantSettings } from './image.ts';
 import { fileExists, projectRoot } from '../content/index.ts';
 import {
 	captureSortValue,
@@ -12,14 +14,6 @@ import {
 } from '../content/schema.ts';
 import { watermarkOverlay, watermarkSettings } from './watermark.ts';
 import { isLosslessWebp } from './lib/master.mjs';
-
-// Implementation candidates, pending Nicolas's cross-browser color/quality review.
-export const variantSettings = {
-	widths: [480, 800, 1200, 1600, 2400],
-	jpegQuality: 86,
-	webpQuality: 84,
-	version: 1
-};
 
 export const downloadSettings = { lossless: true, effort: 4, version: 1 };
 
@@ -41,26 +35,6 @@ export function fullResolutionDownload(buffer: Buffer, photo: PhotoRecord) {
 		.webp({ lossless: true, effort: downloadSettings.effort })
 		.withIccProfile('srgb')
 		.toBuffer();
-}
-
-export async function inspectImage(filename: string, expected?: { width: number; height: number }) {
-	const metadata = await sharp(filename).metadata();
-	if (
-		metadata.exif ||
-		metadata.xmp ||
-		metadata.iptc ||
-		metadata.comments?.length ||
-		(metadata.orientation && metadata.orientation !== 1)
-	) {
-		throw new Error(
-			`${path.basename(filename)}: Unapproved embedded metadata or orientation; sanitize the master before building.`
-		);
-	}
-	if (expected && (metadata.width !== expected.width || metadata.height !== expected.height))
-		throw new Error(
-			`${path.basename(filename)}: Image dimensions differ from the reviewed record.`
-		);
-	return metadata;
 }
 
 /**
@@ -133,12 +107,7 @@ export async function buildVariants(
 				height: photo.asset.height
 			};
 		}
-		const widths = [
-			...new Set([
-				...variantSettings.widths.filter((width) => width < photo.asset.width),
-				Math.min(photo.asset.width, 2400)
-			])
-		];
+		const widths = variantWidths(photo.asset.width);
 		const formats = { jpeg: [] as string[], webp: [] as string[] };
 		for (const format of ['jpeg', 'webp'] as const)
 			for (const width of widths) {

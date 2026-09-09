@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import { mdsvex } from 'mdsvex';
 import { contentComponentsPlugin } from './scripts/content/components.ts';
 import { contentWatchPlugin, generateContent } from './scripts/content/generate.ts';
+import { markdownOptions } from './scripts/content/markdown.ts';
 
 export default defineConfig(async ({ command }) => {
 	// Unfinished work is a warning while you write and an error when you build.
@@ -18,10 +19,7 @@ export default defineConfig(async ({ command }) => {
 				inlineStyleThreshold: 40 * 1024,
 				extensions: ['.svelte', '.md', '.svx'],
 				// The component imports are added before MDsveX compiles the Markdown.
-				preprocess: [
-					contentComponentsPlugin(),
-					mdsvex({ extensions: ['.md', '.svx'], highlight: false })
-				],
+				preprocess: [contentComponentsPlugin(), mdsvex(markdownOptions)],
 				compilerOptions: {
 					// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
 					runes: ({ filename }) =>

@@ -305,6 +305,14 @@ export interface GalleryImage {
 /** A photograph as one essay refers to it: its own name, plus the image itself. */
 export type EssayImage = GalleryImage & { alias: string; placed: boolean };
 
+export interface FigureImage {
+	src: string;
+	width: number;
+	height: number;
+	srcset?: string;
+	webpSrcset?: string;
+}
+
 /**
  * A page as the catalog holds it: its own frontmatter, where it sits in the tree,
  * and — for a page that names photographs — those photographs resolved to images.
@@ -321,6 +329,7 @@ export interface CatalogPage extends Omit<PageMetadata, 'images' | 'cover'> {
 	directory: boolean;
 	children: string[];
 	images: EssayImage[];
+	figures: Record<string, FigureImage>;
 	cover: string | null;
 	/**
 	 * Whether this page shows photographs, so the shell knows to carry the viewer.

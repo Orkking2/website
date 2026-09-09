@@ -52,6 +52,7 @@ export function stripCode(body: string) {
 export interface ContentTag {
 	name: string;
 	attributes: Record<string, string>;
+	expressions: string[];
 	line: number;
 }
 
@@ -61,6 +62,9 @@ export function findTags(body: string, names: readonly string[]): ContentTag[] {
 	const pattern = new RegExp(`<(${names.join('|')})(?=[\\s/>])([^>]*?)/?>`, 'g');
 	return [...source.matchAll(pattern)].map((match) => ({
 		name: match[1],
+		expressions: [...match[2].matchAll(/([A-Za-z][\w-]*)\s*=\s*\{/g)].map(
+			(attribute) => attribute[1]
+		),
 		// Expression attributes such as from={value} are deliberately skipped: only a literal is checkable.
 		attributes: Object.fromEntries(
 			[

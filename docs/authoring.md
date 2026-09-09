@@ -67,6 +67,24 @@ Everything else is a facet you add when the page needs it. **A key you leave out
 | `images`, `cover`            | Makes the page a photo essay. See below.                                                                                                                         |
 | `location`, `inProgress`     | Where a photograph was made, and whether the page announces itself as unfinished.                                                                                |
 
+## Footnotes
+
+Use a named reference and a matching definition in ordinary Markdown:
+
+```markdown
+The result depends on the workload.[^benchmark]
+
+[^benchmark]: Describe the workload and link to the source here.
+```
+
+Notes are numbered by their first reference, regardless of where their definitions appear.
+Reuse the same reference to cite a note again; each occurrence gets its own return link
+from the footnote section. Definitions may contain links, emphasis, code, and additional
+paragraphs indented by four spaces. A reference without a definition fails the content
+check and build. Code examples and escaped markers remain literal text.
+
+References and return links work with the keyboard and without JavaScript.
+
 ## Commands
 
 | Command                                                            | What it does                                                         |
@@ -124,6 +142,22 @@ Anything named with `from` is a **path**, looked up in the page tree, so the tit
 | `<Annotation title="…">`                            | A collapsible aside in an article's annotation rail.                                                                                                                    |
 
 Ordinary HTML works too, and picks up the site's styles — `<section class="workbench">` and the rest are global. That is the escape hatch when a page wants a shape no component covers.
+
+### Article figures
+
+Keep a diagram beside the article and reference it directly:
+
+```svelte
+<Figure src="./UBQ Visualization.drawio.svg" alt="UBQ queue visualization" />
+```
+
+No import block, frontmatter image map, or manual dimensions are needed. Paths are relative to the Markdown file; spaces in filenames work. Shared assets can use `../`, within `src/content/`. An asset folder should start with `_` (for example `_figures/`) so it is not treated as a page. A root-relative path such as `/images/diagram.svg` instead resolves inside `static/`.
+
+`Figure` fills its available container width and preserves the image's proportions. The build reads intrinsic dimensions to reserve space before loading; `width` and `height` are not required layout controls. Add `caption="…"` for a caption and `pdf="/documents/diagram.pdf"` for an optional PDF link. Describe the figure in `alt`; use `alt=""` only for a decorative image, and explain complex diagrams in nearby prose.
+
+SVGs stay vector images, including editable draw.io SVG exports. PNG, JPEG, and WebP figures use the photograph pipeline's responsive width selection and metadata checks, generating lossless WebP with PNG fallbacks that preserve transparency. These outputs live in the ignored, generated `static/images/figures/` directory. Commit the source image with its article. Changes to a source produce a new asset URL, and unused generated assets are removed on the next build.
+
+Use `<Photo of="…" />` for reviewed library photographs; their editorial records, watermarks, and viewer remain part of the photograph workflow. A figure cannot reference a `.photogrid` master directly. Local figures are validated for file containment, supported format, embedded metadata, and alternative text. Authored expression sources (`src={importedImage}`) and external URLs still work, but automatic preparation applies to literal local paths only; those other sources need their own dimensions. The optional `sizes` attribute overrides the browser's raster size hint when a custom layout needs it.
 
 ### The photograph gallery
 

@@ -4,6 +4,7 @@ import { stringify } from 'yaml';
 import { compile as markdown } from 'mdsvex';
 import { compile as svelte } from 'svelte/compiler';
 import { withComponentImports } from './components.ts';
+import { markdownOptions } from './markdown.ts';
 import { contentDirectory, indexName, projectRoot, readContent, routeOf } from './index.ts';
 import { dateSchema, findVoiceFlags, isReady, routeSchema } from './schema.ts';
 
@@ -49,9 +50,8 @@ export async function validateContent() {
 		const source = await readFile(path.join(projectRoot, page.file), 'utf8');
 		// Compile exactly what the build compiles, imports included.
 		const compiled = await markdown(withComponentImports(source), {
-			filename: page.file,
-			extensions: ['.md', '.svx'],
-			highlight: false
+			...markdownOptions,
+			filename: page.file
 		});
 		if (!compiled) throw new Error(`${page.file}: Markdown compilation returned no result.`);
 		const result = svelte(compiled.code, { filename: page.file, generate: 'server', runes: true });
