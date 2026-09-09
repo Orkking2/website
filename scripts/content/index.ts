@@ -5,6 +5,7 @@ import path from 'node:path';
 import { parseDocument } from 'yaml';
 import { embeddingComponents, findTags } from './components.ts';
 import { readFigures, type FigureSource } from './figures.ts';
+import { modificationTimes } from './modification.ts';
 import {
 	completenessIssues,
 	isEssay,
@@ -38,6 +39,8 @@ export interface PageNode {
 	directory: boolean;
 	children: string[];
 	file: string;
+	/** Latest file/commit time, including descendants for a directory (Unix milliseconds). */
+	modified: number;
 	body: string;
 	/** Lines the frontmatter occupies, so a body position can be reported against the file. */
 	bodyOffset: number;
@@ -73,7 +76,12 @@ export function routeOf(segments: string[]) {
  * Walk one directory of the tree, in the order a reader would meet it: the
  * directory's own index first, then its children.
  */
-async function walk(root: string, segments: string[], pages: PageNode[]) {
+async function walk(
+	root: string,
+	segments: string[],
+	pages: PageNode[],
+	modified: (file: string) => Promise<number>
+) {
 	const directory = path.join(root, contentDirectory, ...segments);
 	const listed = (await readdir(directory, { withFileTypes: true }))
 		.filter((entry) => !hidden(entry.name))
@@ -107,6 +115,7 @@ async function walk(root: string, segments: string[], pages: PageNode[]) {
 			directory: isIndex,
 			children: [],
 			file,
+			modified: await modified(file),
 			body,
 			bodyOffset,
 			metadata: parseMetadata(raw, file)
@@ -132,29 +141,33 @@ async function walk(root: string, segments: string[], pages: PageNode[]) {
 				`${contentDirectory}/${[...segments, entry.name].join('/')}/: "${entry.name}" is already this page's ${previous}.`
 			);
 		claimed.set(entry.name, `${entry.name}/`);
-		await walk(root, [...segments, entry.name], pages);
+		await walk(root, [...segments, entry.name], pages, modified);
 	}
 }
 
-/** Siblings in the order the site shows them: declared order first, then title. */
+/** Newest modification first; equal dates have a stable title/route tie-break. */
 export function comparePages(a: PageNode, b: PageNode) {
-	const order = [
-		a.metadata.order ?? Number.MAX_SAFE_INTEGER,
-		b.metadata.order ?? Number.MAX_SAFE_INTEGER
-	];
-	if (order[0] !== order[1]) return order[0] - order[1];
-	return a.metadata.title.localeCompare(b.metadata.title);
+	return (
+		b.modified - a.modified ||
+		a.metadata.title.localeCompare(b.metadata.title, 'en') ||
+		a.route.localeCompare(b.route, 'en')
+	);
 }
 
 export async function readContent(root = projectRoot, { strict = true } = {}) {
 	const incomplete: string[] = [];
 	const pages: PageNode[] = [];
-	await walk(root, [], pages);
+	await walk(root, [], pages, await modificationTimes(root, contentDirectory));
 
 	const byRoute = new Map(pages.map((page) => [page.route, page]));
 	for (const page of pages) {
 		if (!page.parent) continue;
 		byRoute.get(page.parent)?.children.push(page.route);
+	}
+	// Parents precede descendants in the walk, so propagate dates bottom-up before sorting.
+	for (const page of pages.toReversed()) {
+		const parent = page.parent ? byRoute.get(page.parent) : undefined;
+		if (parent) parent.modified = Math.max(parent.modified, page.modified);
 	}
 	for (const page of pages)
 		page.children.sort((a, b) => comparePages(byRoute.get(a)!, byRoute.get(b)!));

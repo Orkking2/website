@@ -83,18 +83,6 @@ function describe(page: CatalogPage): CatalogReference {
 	};
 }
 
-/** A directory page's children, newest first, as an index would list them. */
-function ordered(route: string) {
-	return childrenOf(route).toSorted((a, b) => {
-		const order = (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER);
-		if (order) return order;
-		const [newer, older] = [b.published ?? '', a.published ?? ''];
-		if (newer !== older) return newer.localeCompare(older);
-		if (a.featured !== b.featured) return a.featured ? -1 : 1;
-		return a.title.localeCompare(b.title);
-	});
-}
-
 /** One page, named by its path. */
 export function catalogEntry(route: string): CatalogReference {
 	const page = byRoute.get(route);
@@ -104,7 +92,7 @@ export function catalogEntry(route: string): CatalogReference {
 
 /** The children of a directory page, newest first. */
 export function catalogEntries(route: string, limit?: number): CatalogReference[] {
-	const entries = ordered(route).map(describe);
+	const entries = childrenOf(route).map(describe);
 	return limit === undefined ? entries : entries.slice(0, Math.max(0, limit));
 }
 

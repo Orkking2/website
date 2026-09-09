@@ -52,8 +52,6 @@
 		display: block;
 		width: 100%;
 		height: auto;
-		border: 1px solid var(--rule);
-		background: var(--surface-subtle);
 	}
 	.content-figure figcaption {
 		display: flex;

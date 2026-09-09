@@ -30,9 +30,13 @@ Three rules follow from that:
 
 Writing has one canonical tree: `writing/ubq/`, `writing/lubq/`, and `writing/photography/`. The Photography page remains the gallery and lists the photo essays from Writing. Each directory’s `index.md` introduces its subject and uses `<Entries from="/writing/ubq" />` to list its children. `<Entries from="/writing" grouped />` generates the project-by-project lists on the Writing index; adding a directory does not require another registration.
 
-Each article gets its collection’s reading list automatically, with the current article marked. `order` is optional and establishes a deliberate reading sequence. A file directly under Writing remains a standalone entry in the unified index.
+Each article gets its collection’s reading list automatically, with the current article marked. Reading lists, `<Entries>` (including grouped collections), and header/footer navigation all use newest-modified-first ordering. A file directly under Writing remains a standalone entry in the unified index.
 
 The filesystem supplies one canonical home and the default grouping. For a piece useful to several subjects, keep that one home and link to it with `<Entry from="/writing/ubq/head-packing" />` in another collection, or use the existing validated `related` list for a direct reading link. Do not duplicate the file. Multiple collection membership and richer automatic relationships are deferred until there is an actual example to design around.
+
+Ordering is derived at build time; there is no `order` frontmatter field. A clean, committed `.md` or `.svx` page uses its latest Git commit's committer time. Saved local changes (including staged changes) and new files use their filesystem modification time. A source tree without Git history also uses file modification times. Merely touching an unchanged tracked file does not change its committed ordering. Use a checkout with full Git history for reproducible historical dates; a shallow clone can only resolve dates from its available history.
+
+A directory uses the newest modification among its own `index.md` and all descendants, recursively. Hidden files, photographs, and other non-page assets do not affect that date. Equal timestamps sort by title, then route. Publication dates, `updated`, and `featured` do not override this order, and automatic modification times do not change the displayed first-publication or substantive-revision dates. Numbered lists derive their numbers from this sorted sequence. Photo-essay image sequences remain authored; the gallery still uses capture time.
 
 The old project and photo-essay URLs redirect through `static/_redirects`. When moving another published file, update both its inbound references and its redirect.
 
@@ -56,7 +60,6 @@ Everything else is a facet you add when the page needs it. **A key you leave out
 | `headline`                   | The `h1`, when the page opens with a sentence rather than its own name.                                                                                          |
 | `eyebrow`                    | The small label above the heading. A nested page defaults to its parent's title.                                                                                 |
 | `layout`                     | Omit for the broad, centered default. Only `home` needs a special layout. `index` and `article` are retired; `annotations: true` enables the rail independently. |
-| `order`                      | Sorts this page against its siblings, in the header and in `<Entries>`. Unordered pages follow, by title.                                                        |
 | `nav`                        | Whether the header links here. Top-level pages are listed by default; set `false` to keep one out.                                                               |
 | `listed`                     | `false` keeps the page out of the sitemap and marks it `noindex`.                                                                                                |
 | `published`, `updated`       | First publication and substantive revision, `YYYY-MM-DD`.                                                                                                        |
@@ -124,22 +127,22 @@ Anything named with `from` is a **path**, looked up in the page tree, so the tit
 
 ### Reference
 
-| Tag                                                 | Purpose                                                                                                                                                                 |
-| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<Section title="Writing">`                         | A numbered block. Numbers are generated in order of appearance, so reordering sections renumbers them. `layout="split"` sets the block's prose against its links.       |
-| `<Columns>`                                         | Places the sections inside it side by side, stacking on a narrow viewport.                                                                                              |
-| `<Featured from="/writing/ubq" link="Overview">`    | The largest treatment of one page. `label` prefixes the meta line. Write children only to say something that does not belong in that page's own summary.                |
-| `<Entries from="/writing" limit="3">`               | A numbered list of a directory page’s children: explicit `order` first, then date/featured/title. Add `grouped` to show each child directory with its own article list. |
-| `<Entry from="/writing/some-slug">`                 | One row that links to a real page, labelled with its date or status.                                                                                                    |
-| `<Entry title="Head Packing" note="Working topic">` | One row for something not yet published. It links nowhere.                                                                                                              |
-| `<Link to="/writing">Writing index</Link>`          | A forward link in the index's style.                                                                                                                                    |
-| `<Links label="About and CV links">`                | A row of forward links, described for anyone navigating by landmark.                                                                                                    |
-| `<Count of="photographs">`                          | A live count, inline in a sentence. Sources: `photographs`, `essays`, or a directory page's path, as `of="/writing"`.                                                   |
-| `<PhotoGrid />`                                     | The gallery of reviewed photographs, wherever the page puts it. See below.                                                                                              |
-| `<Photo of="tombstone">`                            | One of this page's own photographs, at the article's width and clickable into the viewer. See below.                                                                    |
-| `<Notice title="Coming soon">`                      | An aside for work acknowledged but not done. The release check refuses to ship a launch build containing one.                                                           |
-| `<Figure src="…" alt="…" caption="…">`              | An image with a caption, for use inside an article.                                                                                                                     |
-| `<Annotation title="…">`                            | A collapsible aside in an article's annotation rail.                                                                                                                    |
+| Tag                                                 | Purpose                                                                                                                                                                                 |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<Section title="Writing">`                         | A numbered block. Numbers are generated in order of appearance, so reordering sections renumbers them. `layout="split"` sets the block's prose against its links.                       |
+| `<Columns>`                                         | Places the sections inside it side by side, stacking on a narrow viewport.                                                                                                              |
+| `<Featured from="/writing/ubq" link="Overview">`    | The largest treatment of one page. `label` prefixes the meta line. Write children only to say something that does not belong in that page's own summary.                                |
+| `<Entries from="/writing" limit="3">`               | A numbered list of a directory page’s children: newest modification first, using the same order as the page tree. Add `grouped` to show each child directory with its own article list. |
+| `<Entry from="/writing/some-slug">`                 | One row that links to a real page, labelled with its date or status.                                                                                                                    |
+| `<Entry title="Head Packing" note="Working topic">` | One row for something not yet published. It links nowhere.                                                                                                                              |
+| `<Link to="/writing">Writing index</Link>`          | A forward link in the index's style.                                                                                                                                                    |
+| `<Links label="About and CV links">`                | A row of forward links, described for anyone navigating by landmark.                                                                                                                    |
+| `<Count of="photographs">`                          | A live count, inline in a sentence. Sources: `photographs`, `essays`, or a directory page's path, as `of="/writing"`.                                                                   |
+| `<PhotoGrid />`                                     | The gallery of reviewed photographs, wherever the page puts it. See below.                                                                                                              |
+| `<Photo of="tombstone">`                            | One of this page's own photographs, at the article's width and clickable into the viewer. See below.                                                                                    |
+| `<Notice title="Coming soon">`                      | An aside for work acknowledged but not done. The release check refuses to ship a launch build containing one.                                                                           |
+| `<Figure src="…" alt="…" caption="…">`              | An image with a caption, for use inside an article.                                                                                                                                     |
+| `<Annotation title="…">`                            | A collapsible aside in an article's annotation rail.                                                                                                                                    |
 
 Ordinary HTML works too, and picks up the site's styles — `<section class="workbench">` and the rest are global. That is the escape hatch when a page wants a shape no component covers.
 

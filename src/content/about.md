@@ -1,6 +1,5 @@
 ---
 title: About Me
-order: 1
 eyebrow: About Me
 headline: Me
 summary: "I'm Nicolas, a mathematics and data science student at the University of California, Santa Barbara. This site collects my investigations into efficient algorithms, the writing that grows out of them, and my photography."

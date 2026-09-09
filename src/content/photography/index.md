@@ -1,6 +1,5 @@
 ---
 title: Photography
-order: 4
 eyebrow: Photography
 headline: My various photographs.
 summary: 'A hub to see all my photographs.'

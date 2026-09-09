@@ -1,6 +1,5 @@
 ---
 title: CV
-order: 5
 eyebrow: CV
 headline: My various experiences.
 summary: 'A hub to see the experiences that define my career.'

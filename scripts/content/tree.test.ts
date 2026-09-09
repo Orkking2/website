@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -15,6 +15,7 @@ async function tree(files: Record<string, Record<string, unknown>>) {
 			.map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
 			.join('\n');
 		await writeFile(file, `---\n${frontmatter}\n---\n\nBody.\n`);
+		await utimes(file, 1_700_000_000, 1_700_000_000);
 	}
 	return root;
 }
@@ -72,16 +73,49 @@ test('a hidden directory is not part of the page tree', async () => {
 	assert.deepEqual(pages.map((page) => page.route).toSorted(), ['/', '/photography']);
 });
 
-test('siblings are ordered by what they declare, then by title', async () => {
+test('siblings use modification time, ignoring publication and featured status', async () => {
 	const root = await tree({
 		'index.md': home,
-		'cv.md': { title: 'CV', order: 5 },
-		'about.md': { title: 'About Me', order: 1 },
-		'writing.md': { title: 'Writing', order: 3 },
-		'unranked.md': { title: 'Unranked' }
+		'cv.md': { title: 'CV', published: '2026-09-09', featured: true },
+		'about.md': { title: 'About Me' },
+		'writing.md': { title: 'Writing' },
+		'same-title.md': { title: 'Writing' }
 	});
+	await utimes(path.join(root, 'src/content/writing.md'), 1_800_000_000, 1_800_000_000);
+	await utimes(path.join(root, 'src/content/same-title.md'), 1_800_000_000, 1_800_000_000);
 	const { byRoute } = await readContent(root);
-	assert.deepEqual(byRoute.get('/')?.children, ['/about', '/writing', '/cv', '/unranked']);
+	assert.deepEqual(byRoute.get('/')?.children, ['/same-title', '/writing', '/about', '/cv']);
+});
+
+test('directories inherit deep child dates, while newer indexes and empty directories count too', async () => {
+	const root = await tree({
+		'index.md': home,
+		'writing/index.md': { title: 'Writing' },
+		'writing/deep/index.md': { title: 'Deep' },
+		'writing/deep/article.md': { title: 'Article' },
+		'empty/index.md': { title: 'Empty' },
+		'new-index/index.md': { title: 'New index' },
+		'new-index/old.md': { title: 'Old' },
+		'writing/.hidden.md': { title: 'Hidden' }
+	});
+	await utimes(
+		path.join(root, 'src/content/writing/deep/article.md'),
+		1_800_000_000,
+		1_800_000_000
+	);
+	await utimes(path.join(root, 'src/content/new-index/index.md'), 1_900_000_000, 1_900_000_000);
+	await utimes(path.join(root, 'src/content/writing/.hidden.md'), 2_000_000_000, 2_000_000_000);
+	const { byRoute } = await readContent(root);
+	assert.equal(byRoute.get('/writing')?.modified, 1_800_000_000_000);
+	assert.equal(byRoute.get('/writing/deep')?.modified, 1_800_000_000_000);
+	assert.equal(byRoute.get('/empty')?.modified, 1_700_000_000_000);
+	assert.equal(byRoute.get('/')?.modified, 1_900_000_000_000);
+	assert.deepEqual(byRoute.get('/')?.children, ['/new-index', '/writing', '/empty']);
+});
+
+test('explicit frontmatter ordering is retired', async () => {
+	const root = await tree({ 'index.md': home, 'about.md': { title: 'About', order: 1 } });
+	await assert.rejects(() => readContent(root), /order/);
 });
 
 test('a page names another by its path, and an unknown path is refused', async () => {

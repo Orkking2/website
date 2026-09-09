@@ -129,6 +129,7 @@ Photography → Photo essays ← Writing
 About experience → CV → Relevant writing
 ```
 
+- Page lists, collection reading lists, and navigation sort newest-modified first (approved 2026-09-09); do not add explicit `order` frontmatter. Clean pages use their latest Git commit time, saved local edits and new files use file modification time, and directories inherit the newest time among their index and descendants. Equal times sort by title and route. These derived dates do not replace editorial publication/revision dates.
 - Directory membership supplies a collection and its reading list. `<Entries from="/writing" grouped />` lists each child directory’s articles under its heading.
 - An article has one canonical file. Existing validated `related` paths and explicit `<Entry from="…" />` links can connect collections without duplicating prose. A richer multiple-membership system is deferred.
 - A collection index is a brief orientation and a list, with external resources when relevant. Articles can be dated or evolving accounts; no long overview is mandatory.
@@ -162,7 +163,7 @@ The UBQ collection and its focused articles together should support:
 - a paper or preprint link;
 - a source-code or repository link;
 - a docs.rs link;
-- related writing, ordered deliberately or by publication date;
+- related writing, listed newest-modified first;
 - optional figures, benchmarks, or technical details only when supplied and contextualized.
 
 Do not infer what “UBQ” expands to, claim performance results, or describe Nicolas's contribution beyond supplied source material.

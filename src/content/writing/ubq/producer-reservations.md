@@ -1,7 +1,6 @@
 ---
 title: 'Reserving producer slots in UBQ'
 summary: 'The producer’s compare-and-swap reservation and its responsibility at a block boundary.'
-order: 3
 inProgress: true
 published: '2026-09-04'
 updated: '2026-09-08'

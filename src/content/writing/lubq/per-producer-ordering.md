@@ -1,7 +1,6 @@
 ---
 title: 'Per-producer ordering in LUBQ'
 summary: 'How LUBQ preserves each producer’s sequence without imposing one global FIFO order.'
-order: 1
 inProgress: true
 related: ['/writing/ubq/queue-interface']
 ---

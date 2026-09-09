@@ -75,8 +75,6 @@ export const pageSchema = z.strictObject({
 	/** The h1, when the page opens with a sentence rather than its own name. */
 	headline: text.nullable().default(null),
 	layout: z.enum(layouts).default('page'),
-	/** Sorts this page against its siblings, in the header and in <Entries>. */
-	order: z.number().int().optional(),
 	/** Whether the header links to this page. Top-level pages are listed by default. */
 	nav: z.boolean().optional(),
 	/** Whether search engines and the sitemap are told about this page. */
@@ -318,6 +316,8 @@ export interface FigureImage {
  * and — for a page that names photographs — those photographs resolved to images.
  */
 export interface CatalogPage extends Omit<PageMetadata, 'images' | 'cover'> {
+	/** Derived modification time, including descendants, used for chronological lists. */
+	modified: number;
 	/** The path this page is served at: "/", "/writing", "/photography/worn-with-time". */
 	route: string;
 	/** The route of the page one level up, or null for the root. */

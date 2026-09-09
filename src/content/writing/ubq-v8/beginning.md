@@ -1,6 +1,5 @@
 ---
 title: The Beginning
-order: 1
 summary: Changes to batching and block management that prompted UBQ V8.
 ---
 
@@ -10,7 +9,7 @@ Several discoveries during the development of UBQ prompted me to begin V8. The f
 
 Instead of incrementing the counter after every slot, I changed UBQ to accumulate the count locally and update the counter when the batch finishes its portion of a block. Consider this queue:
 
-<Figure src="./UBQ Visualization.drawio.svg" alt="A queue block with three consumed slots, four being consumed, and three published slots." />
+<Figure src="./UBQ Visualization.svg" alt="A queue block with three consumed slots, four being consumed, and three published slots." />
 
 The block is in the middle of a transition. The first three slots have been consumed, the next four are being consumed, and the final three have been published. Previously, UBQ would increment `consumed` once for each of those four slots. That meant repeatedly updating the same atomic even though the reservation had already established how many slots the consumer would process.
 

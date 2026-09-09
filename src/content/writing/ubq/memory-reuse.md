@@ -1,7 +1,6 @@
 ---
 title: 'Completing and reusing UBQ blocks'
 summary: 'How completed slots are counted and how standalone blocks and allocation runs are released.'
-order: 4
 inProgress: true
 ---
 

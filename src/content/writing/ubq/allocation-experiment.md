@@ -1,7 +1,6 @@
 ---
 title: 'An allocation experiment in UBQ'
 summary: 'An account of the allocation experiment and what the current profiler measures.'
-order: 5
 inProgress: true
 ---
 

@@ -1,13 +1,12 @@
 ---
 title: Head packing in UBQ
 summary: How UBQ represents a block address and slot index together.
-order: 2
 inProgress: true
 ---
 
 ## Where the design begins
 
-While the name derives from [BBQ, the Block-based Bounded Queue][bbq] presented at USENIX ATC 2022, the implementation is largly derived from Crossbeam's `SegQueue`. 
+While the name derives from [BBQ, the Block-based Bounded Queue][bbq] presented at USENIX ATC 2022, the implementation is largly derived from Crossbeam's `SegQueue`.
 
 [`SegQueue`][segqueue] keeps a separate atomic index and atomic block pointer at each end of the queue. The index also carries information beyond a simple offset; its value is used to derive the position within a block. When the queue advances to another block, the implementation coordinates the index and pointer updates so that a thread uses the appropriate pair.
 

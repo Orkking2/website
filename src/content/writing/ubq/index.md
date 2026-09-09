@@ -1,7 +1,6 @@
 ---
 title: 'UBQ'
 summary: 'Writing about the Unbounded Block-based Queue.'
-order: 1
 status: In development
 links:
   {

@@ -1,6 +1,5 @@
 ---
 title: Writing
-order: 2
 eyebrow: Writing
 headline: My various writings
 summary: 'My writing on projects and photographs.'

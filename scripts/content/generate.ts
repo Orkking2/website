@@ -37,6 +37,7 @@ export async function generateContent({ strict = true } = {}) {
 		const essay = isEssay(page.metadata);
 		return {
 			...metadata,
+			modified: page.modified,
 			figures: figures.get(page.route)!,
 			route: page.route,
 			parent: page.parent,
